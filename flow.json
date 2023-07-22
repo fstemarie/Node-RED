@@ -2,7 +2,14 @@
     {
         "id": "2dbe54a8.332f04",
         "type": "tab",
-        "label": "/r/GameDeals",
+        "label": "/r/GameDeals Reddit",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "790250a5.c8101",
+        "type": "tab",
+        "label": "/c/GameDeals Lemmy.world",
         "disabled": false,
         "info": ""
     },
@@ -14,28 +21,45 @@
         "info": ""
     },
     {
-        "id": "790250a5.c8101",
+        "id": "608d48c1c2c08ca6",
         "type": "tab",
-        "label": "Basic Web Page",
+        "label": "Flow 1",
         "disabled": false,
-        "info": ""
+        "info": "",
+        "env": []
     },
     {
         "id": "63d893f4.3e39a4",
         "type": "inject",
         "z": "2dbe54a8.332f04",
         "name": "",
-        "props": [],
-        "repeat": "3600",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "url",
+                "v": "https://www.reddit.com/r/GameDeals/search/.json",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "7200",
         "crontab": "",
         "once": false,
         "onceDelay": "",
-        "topic": "",
-        "x": 85,
-        "y": 60,
+        "topic": "/r/GameDeals",
+        "payload": "{\"restrict_sr\":\"on\",\"t\":\"day\",\"sort\":\"new\",\"limit\":25,\"q\":\"\\\"free\\\" or \\\"100%\\\" or \\\"100 %\\\"\"}",
+        "payloadType": "json",
+        "x": 105,
+        "y": 140,
         "wires": [
             [
-                "9a2c3803a22719e6"
+                "9a2c3803a22719e6",
+                "48ccd46cd7930ac5"
             ]
         ],
         "l": false
@@ -56,30 +80,12 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 370,
-        "y": 60,
+        "x": 350,
+        "y": 140,
         "wires": [
             [
-                "d85f5c7c553769d3"
-            ]
-        ]
-    },
-    {
-        "id": "bdef534b.d33f5",
-        "type": "split",
-        "z": "2dbe54a8.332f04",
-        "name": "array to posts",
-        "splt": "",
-        "spltType": "str",
-        "arraySplt": 1,
-        "arraySpltType": "len",
-        "stream": false,
-        "addname": "",
-        "x": 780,
-        "y": 60,
-        "wires": [
-            [
-                "464634ef.8dbb2c"
+                "d85f5c7c553769d3",
+                "ad667ec510747aea"
             ]
         ]
     },
@@ -88,92 +94,62 @@
         "type": "function",
         "z": "2dbe54a8.332f04",
         "name": "filter",
-        "func": "let re\n\nre = /(limited time)|(weekend)|(free to play)|(trial)|(buy)/ig;\nif (msg.payload.title.search(re) > -1) return null;\n// re = /(free)|(100%)|(100 %)/ig;\n// if (msg.payload.title.search(re) == -1) return null;\nre = /(gog)|(steam)|(epic)|(humble)|(buy)/i;\nif (msg.payload.title.search(re) == -1) return null;\n\nreturn msg;",
+        "func": "const posts = msg.payload.filter(x => {\n    let re = /(limited time)|(weekend)|(free to play)|(trial)|(buy)/ig\n    if (x.title.search(re) > -1)\n        return false\n    if (x.domain === \"self.GameDeals\")\n        return false\n    // re = /(free)|(100%)|(100 %)/ig\n    // if (x.title.search(re) == -1) return null\n    // re = /(gog)|(steam)|(epic)|(humble)/i\n    // if (x.title.search(re) == -1) return null\n    return true\n})\n\nif (posts.length) {\n    msg.payload = posts\n    return msg\n} else {\n    return null\n}\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 210,
+        "x": 690,
         "y": 140,
         "wires": [
             [
-                "f908710754b3ba64"
+                "7e83179aa3887405"
             ]
-        ]
-    },
-    {
-        "id": "1b85bf46.53eef9",
-        "type": "debug",
-        "z": "2dbe54a8.332f04",
-        "name": "first",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 535,
-        "y": 140,
-        "wires": [],
-        "l": false
+        ],
+        "icon": "node-red/rbe.png"
     },
     {
         "id": "d85f5c7c553769d3",
         "type": "function",
         "z": "2dbe54a8.332f04",
-        "name": "prepare for split",
-        "func": "if (msg.payload.data.children.length) {\n    flow.set(\"before\", msg.payload.data.children[0].data.name)\n}\n\n// Nettoye l'objet msg\ndelete msg.statusCode\ndelete msg.headers\ndelete msg.responseUrl\ndelete msg.redirectList\ndelete msg.retry\ndelete msg.responseCookies\n\n// Prepare l'objet a etre separe par posts\nmsg.payload = msg.payload.data.children.map(x => x.data)\n\nreturn msg;",
+        "name": "prepare posts",
+        "func": "// Aucun resultats\nif (msg.payload.data.children == 0) {\n    return null\n}\n\n// Nettoye l'objet msg\ndelete msg.url\ndelete msg.statusCode\ndelete msg.headers\ndelete msg.responseUrl\ndelete msg.redirectList\ndelete msg.retry\ndelete msg.responseCookies\n\n// Prepare l'objet a etre separe par posts\nmsg.payload = msg.payload.data.children.map(x => {\n    x = x.data\n    const post = {\n        title: x.title,\n        name: x.name,\n        permalink: x.permalink,\n        url: x.url,\n        domain: x.domain,\n        published: moment.unix(x.created_utc).toISOString()\n    }\n    return post\n})\nflow.set(\"before\", msg.payload[0].name)\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "libs": [],
-        "x": 560,
-        "y": 60,
+        "libs": [
+            {
+                "var": "moment",
+                "module": "moment"
+            }
+        ],
+        "x": 520,
+        "y": 140,
         "wires": [
             [
-                "bdef534b.d33f5"
+                "464634ef.8dbb2c"
             ]
-        ]
+        ],
+        "icon": "node-red/swap.svg"
     },
     {
         "id": "9a2c3803a22719e6",
         "type": "function",
         "z": "2dbe54a8.332f04",
         "name": "before",
-        "func": "const before = flow.get(\"before\")\n\nconst url = \"https://www.reddit.com/r/GameDeals/search/.json\"\nconst payload = {\n    q: `\"free\" or \"100%\" or \"100 %\"`,\n    restrict_sr: \"on\",\n    t: \"week\",\n    sort: \"new\",\n    limit: 100\n}\nif (before) {\n    payload[\"before\"] = before\n}\n\nmsg.url = url\nmsg.payload = payload\n\nreturn msg;",
+        "func": "const before = flow.get(\"before\")\nif (before) {\n    msg.payload.before = before\n}\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 210,
-        "y": 60,
-        "wires": [
-            [
-                "8b96914.cfa247"
-            ]
-        ]
-    },
-    {
-        "id": "f908710754b3ba64",
-        "type": "function",
-        "z": "2dbe54a8.332f04",
-        "name": "prepare post",
-        "func": "let post = {}\nlet payload = msg.payload\nmsg.post = post\n\npost.name = payload.name\npost.permalink = payload.permalink\npost.title = payload.title\npost.domain = payload.domain\npost.url = payload.url\npost.thumbnail = payload.thumbnail\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 390,
         "y": 140,
         "wires": [
             [
-                "1b85bf46.53eef9"
+                "8b96914.cfa247"
             ]
         ]
     },
@@ -188,8 +164,8 @@
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
-        "x": 85,
-        "y": 260,
+        "x": 105,
+        "y": 200,
         "wires": [
             [
                 "0917b76e5a1bbcf1"
@@ -201,17 +177,289 @@
         "id": "0917b76e5a1bbcf1",
         "type": "function",
         "z": "2dbe54a8.332f04",
-        "name": "Empty before",
+        "name": "empty before",
         "func": "flow.set(\"before\", undefined)\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 240,
-        "y": 260,
+        "x": 230,
+        "y": 200,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "a3151e79522adcbf",
+        "type": "http in",
+        "z": "2dbe54a8.332f04",
+        "name": "[get] /gamedeals.html",
+        "url": "/gamedeals.html",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 260,
+        "y": 260,
+        "wires": [
+            [
+                "850c876f419ca8b7"
+            ]
+        ]
+    },
+    {
+        "id": "123460247efec5fc",
+        "type": "http response",
+        "z": "2dbe54a8.332f04",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 610,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "aeef8b2ffa8b97d2",
+        "type": "file",
+        "z": "2dbe54a8.332f04",
+        "name": "write html",
+        "filename": "/workspace/gamedeals/gamedeals.html",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 1000,
+        "y": 140,
+        "wires": [
+            [
+                "ef487136ac51641d"
+            ]
+        ]
+    },
+    {
+        "id": "850c876f419ca8b7",
+        "type": "file in",
+        "z": "2dbe54a8.332f04",
+        "name": "read html",
+        "filename": "/workspace/gamedeals/gamedeals.html",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 460,
+        "y": 260,
+        "wires": [
+            [
+                "123460247efec5fc"
+            ]
+        ]
+    },
+    {
+        "id": "7e83179aa3887405",
+        "type": "template",
+        "z": "2dbe54a8.332f04",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <link rel=\"stylesheet\" href=\"https://www.w3schools.com/w3css/4/w3.css\"> \n    <style>\n        body{\n            background-image: url(\"https://i.imgur.com/kHYmINz.png\");\n            background-repeat: scroll;\n            background-size: cover;\n        }\n        .card{\n            width: 50%;\n        }\n    </style>\n    <title>/r/GameDeals</title>\n</head>\n<body class=\"w3-container\" style=\"margin: 0 auto;\">\n    {{#payload}}\n    <div class=\"w3-card w3-white w3-leftbar w3-border-blue w3-padding w3-margin card\" style=\"margin: 0 auto;\">\n        <h3>{{title}}</h3>\n        <p class=\"w3-bar\">\n            <a href=\"http://www.reddit.com{{permalink}}\">Reddit link</a>\n            <a href=\"{{url}}\">Direct link</a>\n        </p>\n    </div>\n    {{/payload}}\n</body>\n</html>\n",
+        "output": "str",
+        "x": 840,
+        "y": 140,
+        "wires": [
+            [
+                "aeef8b2ffa8b97d2",
+                "51c93d396d3a9ae3"
+            ]
+        ]
+    },
+    {
+        "id": "51c93d396d3a9ae3",
+        "type": "e-mail",
+        "z": "2dbe54a8.332f04",
+        "server": "smtp.gmail.com",
+        "port": "465",
+        "authtype": "BASIC",
+        "saslformat": true,
+        "token": "oauth2Response.access_token",
+        "secure": true,
+        "tls": true,
+        "name": "fstemarie@gmail.com",
+        "dname": "gmail",
+        "x": 990,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "48ccd46cd7930ac5",
+        "type": "template",
+        "z": "2dbe54a8.332f04",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "plain",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n<head>\n    <meta charset=\"utf-8\">\n    <link rel=\"stylesheet\" href=\"https://www.w3schools.com/w3css/4/w3.css\"> \n    <style>\n        body, html{\n            height: 100%;\n        }\n        body{\n            background-image: url(\"https://i.imgur.com/kHYmINz.png\");\n            background-repeat: no-repeat;\n            background-size: cover;\n        }\n    </style>\n    <title>/r/GameDeals</title>\n</head>\n<body class=\"w3-display-container\">\n    <div class=\"w3-display-container w3-container w3-display-middle w3-blue\">\n        <h1>Aucun nouveau jeux gratuit pour le moment...</h1>\n    </div>\n</body>\n</html>\n",
+        "output": "str",
+        "x": 220,
+        "y": 60,
+        "wires": [
+            [
+                "b94ef37505493622"
+            ]
+        ]
+    },
+    {
+        "id": "b94ef37505493622",
+        "type": "file",
+        "z": "2dbe54a8.332f04",
+        "name": "write html",
+        "filename": "/workspace/gamedeals/gamedeals.html",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 380,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ef487136ac51641d",
+        "type": "debug",
+        "z": "2dbe54a8.332f04",
+        "name": "last",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1115,
+        "y": 140,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "ad667ec510747aea",
+        "type": "debug",
+        "z": "2dbe54a8.332f04",
+        "name": "reddit",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 495,
+        "y": 60,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "9c97ba56c388dfaf",
+        "type": "inject",
+        "z": "790250a5.c8101",
+        "name": "",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "url",
+                "v": "https://lemmy.world/api/v3/search",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "/c/GameDeals",
+        "payload": "{\"community_id\":1489,\"community_name\":\"gamedeals\",\"sort\":\"New\",\"q\":\"free\"}",
+        "payloadType": "json",
+        "x": 105,
+        "y": 120,
+        "wires": [
+            [
+                "53d6582df57bba0f"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "53d6582df57bba0f",
+        "type": "http request",
+        "z": "790250a5.c8101",
+        "name": "lemmy.world",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 230,
+        "y": 120,
+        "wires": [
+            [
+                "9051c26c9a78be01"
+            ]
+        ]
+    },
+    {
+        "id": "1a853615694a5861",
+        "type": "debug",
+        "z": "790250a5.c8101",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 555,
+        "y": 120,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "9051c26c9a78be01",
+        "type": "function",
+        "z": "790250a5.c8101",
+        "name": "prepare posts",
+        "func": "let posts = msg.payload.posts.map(x => {\n    x = x.post\n    let post = {\n        id: x.id,\n        postLink: x.ap_id,\n        title: x.name,\n        url: x.url,\n        published: x.published\n    }\n    return post\n})\nmsg.payload = posts\n\ndelete msg.url\ndelete msg.headers\ndelete msg.statusCode\ndelete msg.responseUrl\ndelete msg.redirectList\ndelete msg.retry\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 120,
+        "wires": [
+            [
+                "1a853615694a5861"
+            ]
         ]
     },
     {
@@ -276,7 +524,7 @@
         "type": "function",
         "z": "1c9d8fd6.7a925",
         "name": "change",
-        "func": "const re = /^(?<title>.*)@@(?<artist>.*)$/\nlet tags = {}\nlet year = moment(msg.article.pubDate)\nlet artist = \"\"\n\nmsg.title = msg.article.title\nlet title = msg.article.title.valueOf()\nlet matinee = (title.startsWith(\"Matinee Monday:\") || title.startsWith(\"Re-Release:\"))\ntitle = title\n    .replace(\"Matinee Monday:\", \"\")\n    .replace(\"Re-Release:\", \"\")\n    .replace(/\\s+/g, \" \")\n    .replace(/\\s*\\)$/, \"\")\n    .replace(/\\s*\\(?w\\/\\s*/, \"@@\")\n    .trim()\nif (re.test(title)) {\n    const groups = re.exec(title).groups\n    artist = groups.artist.trim()\n    title = groups.title.trim()\n}\n\nlet filename\nif (matinee) {\n    // filename = \"/podcasts/blabla - mm/\"\n    filename = \"/podcasts/How Did This Get Made - Matinee Monday/Matinee Monday_ \"\n    filename = filename + sanitize(title + \".mp3\")\n} else {\n    // filename = \"/podcasts/blabla/\"\n    filename = \"/podcasts/How Did This Get Made_/\"\n    filename = filename + sanitize(year.format('YYYY-MM-DD') + \" - \" + title + \".mp3\")\n}\nmsg.filename = filename\n\ntags.title = (matinee ? \"Matinee Monday: \":\"\") + title\ntags.artist = artist\ntags.album = \"How Did This Get Made?\"\ntags.performerInfo = \"Earwolf and Paul Scheer, June Diane Raphael, Jason Mantzoukas\"\ntags.year = year.format('YYYY-MM-DD')\ntags.trackNumber = year.format('YYYYMMDD')\ntags.image = \"/podcasts/How Did This Get Made_/folder.jpg\"\nmsg.tags = tags\nmsg.url = msg.article.enclosures[0].url\n\ndelete msg.article\ndelete msg.payload\n\nreturn msg",
+        "func": "const re = /^(?<title>.*)@@(?<artist>.*)$/\nconst tags = {}\nconst year = moment(msg.article.pubDate)\nlet artist = \"\"\n\nmsg.title = msg.article.title\nlet title = msg.article.title.valueOf()\nlet matinee = (title.startsWith(\"Matinee Monday:\") || title.startsWith(\"Re-Release:\"))\ntitle = title\n    .replace(\"Matinee Monday:\", \"\")\n    .replace(\"Re-Release:\", \"\")\n    .replace(/\\s+/g, \" \")\n    .replace(/\\s*\\)$/, \"\")\n    .replace(/\\s*\\(?w\\/\\s*/, \"@@\")\n    .trim()\nif (re.test(title)) {\n    const groups = re.exec(title).groups\n    artist = groups.artist.trim()\n    title = groups.title.trim()\n}\n\nlet filename\nif (matinee) {\n    // filename = \"/podcasts/blabla - mm/\"\n    filename = \"/podcasts/How Did This Get Made - Matinee Monday/Matinee Monday_ \"\n    filename = filename + sanitize(title + \".mp3\")\n} else {\n    // filename = \"/podcasts/blabla/\"\n    filename = \"/podcasts/How Did This Get Made_/\"\n    filename = filename + sanitize(year.format('YYYY-MM-DD') + \" - \" + title + \".mp3\")\n}\nmsg.filename = filename\n\ntags.title = (matinee ? \"Matinee Monday: \":\"\") + title\ntags.artist = artist\ntags.album = \"How Did This Get Made?\"\ntags.performerInfo = \"Earwolf and Paul Scheer, June Diane Raphael, Jason Mantzoukas\"\ntags.year = year.format('YYYY-MM-DD')\ntags.trackNumber = year.format('YYYYMMDD')\ntags.image = \"/podcasts/How Did This Get Made_/folder.jpg\"\nmsg.tags = tags\nmsg.url = msg.article.enclosures[0].url\n\ndelete msg.article\nmsg.payload = '\"' + moment().toISOString() + '\",\"' + filename + '\",\"' + tags.year + '\",\"' + title + '\"'\n\nreturn msg",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -384,7 +632,7 @@
         "type": "debug",
         "z": "1c9d8fd6.7a925",
         "name": "filter",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -421,9 +669,9 @@
         "id": "da9d2e98fbfa89b5",
         "type": "comment",
         "z": "1c9d8fd6.7a925",
-        "name": "Filtre les articles non desires",
+        "name": "Filtre les episodes non desirees",
         "info": "",
-        "x": 600,
+        "x": 610,
         "y": 320,
         "wires": []
     },
@@ -458,50 +706,285 @@
         "wires": []
     },
     {
-        "id": "473c5d1e.3f773c",
-        "type": "http in",
-        "z": "790250a5.c8101",
-        "name": "",
-        "url": "/helloworld",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 150,
-        "y": 280,
+        "id": "474fca24b26a8869",
+        "type": "complete",
+        "z": "1c9d8fd6.7a925",
+        "name": "log",
+        "scope": [
+            "f3cac49e20cd5ab8"
+        ],
+        "uncaught": false,
+        "x": 110,
+        "y": 540,
         "wires": [
             [
-                "57d73f0b.fd0e78"
+                "3964538f7a598aed"
             ]
         ]
     },
     {
-        "id": "57d73f0b.fd0e78",
+        "id": "3964538f7a598aed",
         "type": "template",
-        "z": "790250a5.c8101",
+        "z": "1c9d8fd6.7a925",
         "name": "",
         "field": "payload",
         "fieldType": "msg",
-        "format": "html",
+        "format": "handlebars",
         "syntax": "mustache",
-        "template": "<!DOCTYPE html>\n<html>\n<head>\n\t<title>Hello</title>\n\n\t<h1>Hello World</h1>\n</head>\n<body>\n\n<p> This is a demo on how to create webpages and dashboards </p>\n</body>\n</html>",
+        "template": "{{{payload}}}",
         "output": "str",
-        "x": 360,
-        "y": 280,
+        "x": 260,
+        "y": 540,
         "wires": [
             [
-                "44786f9d.5edfb8"
+                "1660c3d44194082d"
             ]
         ]
     },
     {
-        "id": "44786f9d.5edfb8",
-        "type": "http response",
-        "z": "790250a5.c8101",
+        "id": "1660c3d44194082d",
+        "type": "file",
+        "z": "1c9d8fd6.7a925",
+        "name": "hdtgm.log",
+        "filename": "/workspace/podcasts/hdtgm.log",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "ascii",
+        "x": 420,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3dc65f3a354fd372",
+        "type": "inject",
+        "z": "608d48c1c2c08ca6",
         "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 530,
-        "y": 280,
+        "props": [
+            {
+                "p": "url",
+                "v": "https://freebies.indiegala.com/broccoli-bob",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 145,
+        "y": 160,
+        "wires": [
+            [
+                "21ec93e00a729f6d"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "21ec93e00a729f6d",
+        "type": "http request",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 270,
+        "y": 160,
+        "wires": [
+            [
+                "5ffc9d7b408926ff"
+            ]
+        ]
+    },
+    {
+        "id": "5ffc9d7b408926ff",
+        "type": "debug",
+        "z": "608d48c1c2c08ca6",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 160,
         "wires": []
+    },
+    {
+        "id": "1c3c54d29df06a05",
+        "type": "debug",
+        "z": "608d48c1c2c08ca6",
+        "name": "prepare post",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 355,
+        "y": 240,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "2de873c4f55a3fe7",
+        "type": "http request",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "query",
+        "url": "",
+        "tls": "",
+        "persist": true,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 410,
+        "y": 320,
+        "wires": [
+            [
+                "9668d83246fd52ad"
+            ]
+        ]
+    },
+    {
+        "id": "a3d76c861c253929",
+        "type": "debug",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1035,
+        "y": 320,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "9668d83246fd52ad",
+        "type": "html",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "property": "payload",
+        "outproperty": "metas",
+        "tag": "head > meta",
+        "ret": "attr",
+        "as": "single",
+        "x": 590,
+        "y": 320,
+        "wires": [
+            [
+                "5db4d34eb4075532"
+            ]
+        ]
+    },
+    {
+        "id": "5db4d34eb4075532",
+        "type": "function",
+        "z": "608d48c1c2c08ca6",
+        "name": "url preview",
+        "func": "// delete msg.statusCode\n// delete msg.header\n// delete msg.headers\n// delete msg.responseUrl\n// delete msg.redirectList\n// delete msg.retry\n// delete msg.responseCookies\n\nlet metas = {}\nfor (let meta of msg.metas) {\n    if (\"property\" in meta) {\n        metas[meta.property] = meta.content\n    }\n    if (\"name\" in meta) {\n        metas[meta.name] = meta.content\n    }\n}\n\nlet preview = {}\npreview.title = metas[\"og:title\"] || metas[\"twitter:title\"] || metas[\"title\"]\npreview.description = metas[\"og:description\"] || metas[\"twitter:description\"] || metas[\"description\"]\npreview.thumbnail = metas[\"og:image\"] || metas[\"twitter:image\"] || metas[\"image_src\"]\nmsg.preview = preview\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 320,
+        "wires": [
+            [
+                "c18b41f7ad2dd40d"
+            ]
+        ]
+    },
+    {
+        "id": "216b9731d59df8b0",
+        "type": "inject",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "[{\"url\":\"https://store.epicgames.com/en-US/p/aliens-dark-descent\"},{\"url\":\"https://freebies.indiegala.com/broccoli-bob\"},{\"url\":\"https://www.gog.com/en/game/endless_space_2\"},{\"url\":\"https://store.steampowered.com/app/412020/Metro_Exodus/\"}]",
+        "payloadType": "json",
+        "x": 145,
+        "y": 320,
+        "wires": [
+            [
+                "4c4deff24a42ad8e"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "4c4deff24a42ad8e",
+        "type": "function",
+        "z": "608d48c1c2c08ca6",
+        "name": "split",
+        "func": "for (let i = 0; i < msg.payload.length; i++) {\n    const x = msg.payload[i]\n    x.parts = {\n        index: i,\n        count: msg.payload.length\n    }\n    node.send(x)\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 320,
+        "wires": [
+            [
+                "2de873c4f55a3fe7",
+                "1c3c54d29df06a05"
+            ]
+        ]
+    },
+    {
+        "id": "c18b41f7ad2dd40d",
+        "type": "function",
+        "z": "608d48c1c2c08ca6",
+        "name": "join",
+        "func": "let parts = context.get(\"parts\")\nif (!parts) parts = []\nparts.push(msg)\nif (parts.length < msg.parts.count) {\n    context.set(\"parts\", parts)\n} else {\n    let msg = {\n        topic: \"joined\",\n        payload: parts\n    }\n    context.set(\"parts\", undefined)\n    node.send(msg)\n    node.done()\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 320,
+        "wires": [
+            [
+                "a3d76c861c253929"
+            ]
+        ]
     }
 ]
