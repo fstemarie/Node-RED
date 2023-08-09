@@ -47,8 +47,8 @@
                 "p": "payload"
             }
         ],
-        "repeat": "7200",
-        "crontab": "",
+        "repeat": "",
+        "crontab": "00 12 * * *",
         "once": false,
         "onceDelay": "",
         "topic": "/r/GameDeals",
@@ -58,8 +58,8 @@
         "y": 140,
         "wires": [
             [
-                "9a2c3803a22719e6",
-                "48ccd46cd7930ac5"
+                "48ccd46cd7930ac5",
+                "8b96914.cfa247"
             ]
         ],
         "l": false
@@ -80,12 +80,11 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 350,
+        "x": 210,
         "y": 140,
         "wires": [
             [
-                "d85f5c7c553769d3",
-                "ad667ec510747aea"
+                "d85f5c7c553769d3"
             ]
         ]
     },
@@ -100,7 +99,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 690,
+        "x": 550,
         "y": 140,
         "wires": [
             [
@@ -114,7 +113,7 @@
         "type": "function",
         "z": "2dbe54a8.332f04",
         "name": "prepare posts",
-        "func": "// Aucun resultats\nif (msg.payload.data.children == 0) {\n    return null\n}\n\n// Nettoye l'objet msg\ndelete msg.url\ndelete msg.statusCode\ndelete msg.headers\ndelete msg.responseUrl\ndelete msg.redirectList\ndelete msg.retry\ndelete msg.responseCookies\n\n// Prepare l'objet a etre separe par posts\nmsg.payload = msg.payload.data.children.map(x => {\n    x = x.data\n    const post = {\n        title: x.title,\n        name: x.name,\n        permalink: x.permalink,\n        url: x.url,\n        domain: x.domain,\n        published: moment.unix(x.created_utc).toISOString()\n    }\n    return post\n})\nflow.set(\"before\", msg.payload[0].name)\n\nreturn msg;",
+        "func": "// Aucun resultats\nif (msg.payload.data.children == 0) {\n    return null\n}\n\n// Nettoye l'objet msg\ndelete msg.url\ndelete msg.statusCode\ndelete msg.headers\ndelete msg.responseUrl\ndelete msg.redirectList\ndelete msg.retry\ndelete msg.responseCookies\n\n// Prepare l'objet a etre separe par posts\nmsg.payload = msg.payload.data.children.map(x => {\n    x = x.data\n    const post = {\n        title: x.title,\n        name: x.name,\n        permalink: x.permalink,\n        url: x.url,\n        domain: x.domain,\n        published: moment.unix(x.created_utc).toISOString()\n    }\n    return post\n})\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -125,7 +124,7 @@
                 "module": "moment"
             }
         ],
-        "x": 520,
+        "x": 380,
         "y": 140,
         "wires": [
             [
@@ -133,62 +132,6 @@
             ]
         ],
         "icon": "node-red/swap.svg"
-    },
-    {
-        "id": "9a2c3803a22719e6",
-        "type": "function",
-        "z": "2dbe54a8.332f04",
-        "name": "before",
-        "func": "const before = flow.get(\"before\")\nif (before) {\n    msg.payload.before = before\n}\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 210,
-        "y": 140,
-        "wires": [
-            [
-                "8b96914.cfa247"
-            ]
-        ]
-    },
-    {
-        "id": "daa6687653c0feea",
-        "type": "inject",
-        "z": "2dbe54a8.332f04",
-        "name": "",
-        "props": [],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "x": 105,
-        "y": 200,
-        "wires": [
-            [
-                "0917b76e5a1bbcf1"
-            ]
-        ],
-        "l": false
-    },
-    {
-        "id": "0917b76e5a1bbcf1",
-        "type": "function",
-        "z": "2dbe54a8.332f04",
-        "name": "empty before",
-        "func": "flow.set(\"before\", undefined)\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 230,
-        "y": 200,
-        "wires": [
-            []
-        ]
     },
     {
         "id": "a3151e79522adcbf",
@@ -200,7 +143,7 @@
         "upload": false,
         "swaggerDoc": "",
         "x": 260,
-        "y": 260,
+        "y": 220,
         "wires": [
             [
                 "850c876f419ca8b7"
@@ -215,7 +158,7 @@
         "statusCode": "",
         "headers": {},
         "x": 610,
-        "y": 260,
+        "y": 220,
         "wires": []
     },
     {
@@ -229,7 +172,7 @@
         "createDir": true,
         "overwriteFile": "true",
         "encoding": "utf8",
-        "x": 1000,
+        "x": 860,
         "y": 140,
         "wires": [
             [
@@ -250,7 +193,7 @@
         "encoding": "none",
         "allProps": false,
         "x": 460,
-        "y": 260,
+        "y": 220,
         "wires": [
             [
                 "123460247efec5fc"
@@ -268,7 +211,7 @@
         "syntax": "mustache",
         "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <link rel=\"stylesheet\" href=\"https://www.w3schools.com/w3css/4/w3.css\"> \n    <style>\n        body{\n            background-image: url(\"https://i.imgur.com/kHYmINz.png\");\n            background-repeat: scroll;\n            background-size: cover;\n        }\n        .card{\n            width: 50%;\n        }\n    </style>\n    <title>/r/GameDeals</title>\n</head>\n<body class=\"w3-container\" style=\"margin: 0 auto;\">\n    {{#payload}}\n    <div class=\"w3-card w3-white w3-leftbar w3-border-blue w3-padding w3-margin card\" style=\"margin: 0 auto;\">\n        <h3>{{title}}</h3>\n        <p class=\"w3-bar\">\n            <a href=\"http://www.reddit.com{{permalink}}\">Reddit link</a>\n            <a href=\"{{url}}\">Direct link</a>\n        </p>\n    </div>\n    {{/payload}}\n</body>\n</html>\n",
         "output": "str",
-        "x": 840,
+        "x": 700,
         "y": 140,
         "wires": [
             [
@@ -290,7 +233,7 @@
         "tls": true,
         "name": "fstemarie@gmail.com",
         "dname": "gmail",
-        "x": 990,
+        "x": 850,
         "y": 60,
         "wires": []
     },
@@ -343,26 +286,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1115,
+        "x": 975,
         "y": 140,
-        "wires": [],
-        "l": false
-    },
-    {
-        "id": "ad667ec510747aea",
-        "type": "debug",
-        "z": "2dbe54a8.332f04",
-        "name": "reddit",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 495,
-        "y": 60,
         "wires": [],
         "l": false
     },
