@@ -2,14 +2,7 @@
     {
         "id": "2dbe54a8.332f04",
         "type": "tab",
-        "label": "/r/GameDeals Reddit",
-        "disabled": false,
-        "info": ""
-    },
-    {
-        "id": "790250a5.c8101",
-        "type": "tab",
-        "label": "/c/GameDeals Lemmy.world",
+        "label": "GameDeals",
         "disabled": false,
         "info": ""
     },
@@ -19,6 +12,14 @@
         "label": "Podcasts",
         "disabled": false,
         "info": ""
+    },
+    {
+        "id": "9fd980df2da67037",
+        "type": "tab",
+        "label": "IPTV",
+        "disabled": false,
+        "info": "",
+        "env": []
     },
     {
         "id": "608d48c1c2c08ca6",
@@ -40,25 +41,24 @@
             },
             {
                 "p": "url",
-                "v": "https://www.reddit.com/r/GameDeals/search/.json",
+                "v": "https://www.reddit.com/r/GameDeals/.json",
                 "vt": "str"
             },
             {
                 "p": "payload"
             }
         ],
-        "repeat": "",
-        "crontab": "00 12 * * *",
+        "repeat": "3600",
+        "crontab": "",
         "once": false,
         "onceDelay": "",
         "topic": "/r/GameDeals",
-        "payload": "{\"restrict_sr\":\"on\",\"t\":\"day\",\"sort\":\"new\",\"limit\":25,\"q\":\"\\\"free\\\" or \\\"100%\\\" or \\\"100 %\\\"\"}",
+        "payload": "{\"t\":\"week\",\"sort\":\"new\",\"limit\":25}",
         "payloadType": "json",
         "x": 105,
         "y": 140,
         "wires": [
             [
-                "48ccd46cd7930ac5",
                 "8b96914.cfa247"
             ]
         ],
@@ -84,7 +84,8 @@
         "y": 140,
         "wires": [
             [
-                "d85f5c7c553769d3"
+                "d85f5c7c553769d3",
+                "5050612b677962e7"
             ]
         ]
     },
@@ -93,7 +94,7 @@
         "type": "function",
         "z": "2dbe54a8.332f04",
         "name": "filter",
-        "func": "const posts = msg.payload.filter(x => {\n    let re = /(limited time)|(weekend)|(free to play)|(trial)|(buy)/ig\n    if (x.title.search(re) > -1)\n        return false\n    if (x.domain === \"self.GameDeals\")\n        return false\n    // re = /(free)|(100%)|(100 %)/ig\n    // if (x.title.search(re) == -1) return null\n    // re = /(gog)|(steam)|(epic)|(humble)/i\n    // if (x.title.search(re) == -1) return null\n    return true\n})\n\nif (posts.length) {\n    msg.payload = posts\n    return msg\n} else {\n    return null\n}\n\n",
+        "func": "const posts = msg.payload.filter(x => {\n    let re = /(free)|(100)/ig\n    if (x.title.search(re) == -1)\n        return false\n    re = /(limited time)|(weekend)|(free to play)|(trial)|(buy)/ig\n    if (x.title.search(re) > -1)\n        return false\n    if (x.domain === \"self.GameDeals\")\n        return false\n\n    return true\n})\n\nif (posts.length) {\n    msg.payload = posts\n    return msg\n} else {\n    return null\n}\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -103,7 +104,8 @@
         "y": 140,
         "wires": [
             [
-                "7e83179aa3887405"
+                "7e83179aa3887405",
+                "2b77768678a8412d"
             ]
         ],
         "icon": "node-red/rbe.png"
@@ -143,7 +145,7 @@
         "upload": false,
         "swaggerDoc": "",
         "x": 260,
-        "y": 220,
+        "y": 300,
         "wires": [
             [
                 "850c876f419ca8b7"
@@ -158,7 +160,7 @@
         "statusCode": "",
         "headers": {},
         "x": 610,
-        "y": 220,
+        "y": 300,
         "wires": []
     },
     {
@@ -193,7 +195,7 @@
         "encoding": "none",
         "allProps": false,
         "x": 460,
-        "y": 220,
+        "y": 300,
         "wires": [
             [
                 "123460247efec5fc"
@@ -215,8 +217,7 @@
         "y": 140,
         "wires": [
             [
-                "aeef8b2ffa8b97d2",
-                "51c93d396d3a9ae3"
+                "aeef8b2ffa8b97d2"
             ]
         ]
     },
@@ -233,8 +234,8 @@
         "tls": true,
         "name": "fstemarie@gmail.com",
         "dname": "gmail",
-        "x": 850,
-        "y": 60,
+        "x": 1050,
+        "y": 220,
         "wires": []
     },
     {
@@ -249,7 +250,7 @@
         "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n<head>\n    <meta charset=\"utf-8\">\n    <link rel=\"stylesheet\" href=\"https://www.w3schools.com/w3css/4/w3.css\"> \n    <style>\n        body, html{\n            height: 100%;\n        }\n        body{\n            background-image: url(\"https://i.imgur.com/kHYmINz.png\");\n            background-repeat: no-repeat;\n            background-size: cover;\n        }\n    </style>\n    <title>/r/GameDeals</title>\n</head>\n<body class=\"w3-display-container\">\n    <div class=\"w3-display-container w3-container w3-display-middle w3-blue\">\n        <h1>Aucun nouveau jeux gratuit pour le moment...</h1>\n    </div>\n</body>\n</html>\n",
         "output": "str",
         "x": 220,
-        "y": 60,
+        "y": 220,
         "wires": [
             [
                 "b94ef37505493622"
@@ -268,7 +269,7 @@
         "overwriteFile": "true",
         "encoding": "utf8",
         "x": 380,
-        "y": 60,
+        "y": 220,
         "wires": [
             []
         ]
@@ -278,7 +279,7 @@
         "type": "debug",
         "z": "2dbe54a8.332f04",
         "name": "last",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -292,9 +293,153 @@
         "l": false
     },
     {
+        "id": "4b118e4d62ca1ecf",
+        "type": "template",
+        "z": "2dbe54a8.332f04",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <link rel=\"stylesheet\" href=\"https://www.w3schools.com/w3css/4/w3.css\"> \n    <style>\n        body{\n            background-image: url(\"https://i.imgur.com/kHYmINz.png\");\n            background-repeat: scroll;\n            background-size: cover;\n        }\n        .card{\n            width: 50%;\n        }\n    </style>\n    <title>/r/GameDeals</title>\n</head>\n<body class=\"w3-container\" style=\"margin: 0 auto;\">\n    {{#payload}}\n    <div class=\"w3-card w3-white w3-leftbar w3-border-blue w3-padding w3-margin card\" style=\"margin: 0 auto;\">\n        <h3>{{title}}</h3>\n        <p class=\"w3-bar\">\n            <a href=\"http://www.reddit.com{{permalink}}\">Reddit link</a>\n            <a href=\"{{url}}\">Direct link</a>\n        </p>\n    </div>\n    {{/payload}}\n</body>\n</html>\n",
+        "output": "str",
+        "x": 900,
+        "y": 220,
+        "wires": [
+            [
+                "51c93d396d3a9ae3"
+            ]
+        ]
+    },
+    {
+        "id": "2b77768678a8412d",
+        "type": "function",
+        "z": "2dbe54a8.332f04",
+        "name": "filter prevPosts",
+        "func": "let prevPosts = context.get('prevPosts')\nif (typeof prevPosts  === \"undefined\") prevPosts = new Map()\n\nif (prevPosts.size) {\n    // Clean up prevPosts\n    const now = new Date().getTime()\n    const days = 14 * 24 * 60 * 60 * 1000\n    for (let [name, ts] of prevPosts) {\n        const timeDiff = now - ts\n        if (timeDiff >= days) prevPosts.delete(name)\n    }\n}\n\nconst posts = msg.payload.filter(x => {\n    if (prevPosts.has(x.name)) {\n        return false\n    }\n    prevPosts.set(x.name, new Date(x.published).getTime())\n    return true\n})\ncontext.set(\"prevPosts\", prevPosts)\n\nif (posts.length) {\n    msg.payload = posts\n    return msg\n} else {\n    return null\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\nconst PPFILE = \"/workspace/gamedeals/prevPosts.json\"\n\nconsole.log(\"On Start\")\n\nif (fs.existsSync(PPFILE)) {\n    let ppJSON = fs.readFileSync(PPFILE, \"utf8\")\n    if (ppJSON) {\n    let prevPosts = new Map(JSON.parse(ppJSON))\n        context.set(\"prevPosts\", prevPosts)\n        console.log(\"prevPosts = \", prevPosts)\n    }\n}\n",
+        "finalize": "// Code added here will be run when the\n// node is being stopped or re-deployed.\nconsole.log(\"On Stop\")\n\nconst PPFILE = \"/workspace/gamedeals/prevPosts.json\"\nif (fs.existsSync(PPFILE)) {\n    fs.rmSync(PPFILE)\n}\nlet prevPosts = context.get(\"prevPosts\")\nif (typeof prevPosts  === \"undefined\") return\nif (!prevPosts.size) return\n\nlet ppJSON = JSON.stringify(Array.from(prevPosts.entries()))\nfs.writeFileSync(PPFILE, ppJSON, \"utf8\")\n",
+        "libs": [
+            {
+                "var": "fs",
+                "module": "fs"
+            }
+        ],
+        "x": 720,
+        "y": 220,
+        "wires": [
+            [
+                "4b118e4d62ca1ecf",
+                "13190664d47ece83"
+            ]
+        ],
+        "icon": "node-red/rbe.png"
+    },
+    {
+        "id": "d7fd9118089a99fd",
+        "type": "inject",
+        "z": "2dbe54a8.332f04",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 105,
+        "y": 220,
+        "wires": [
+            [
+                "48ccd46cd7930ac5"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "9533eb590b9a4b8c",
+        "type": "comment",
+        "z": "2dbe54a8.332f04",
+        "name": "https://nodered.iot/app/GameDeals.html",
+        "info": "https://nodered.iot/app/GameDeals.html",
+        "x": 320,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "5050612b677962e7",
+        "type": "debug",
+        "z": "2dbe54a8.332f04",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 315,
+        "y": 80,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "13190664d47ece83",
+        "type": "debug",
+        "z": "2dbe54a8.332f04",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 855,
+        "y": 260,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "77ca3da606296b57",
+        "type": "inject",
+        "z": "2dbe54a8.332f04",
+        "name": "",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "url",
+                "v": "https://www.reddit.com/r/GameDeals/search/.json",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "/r/GameDeals",
+        "payload": "{\"restrict_sr\":\"on\",\"t\":\"week\",\"sort\":\"new\",\"limit\":25,\"q\":\"free 100\"}",
+        "payloadType": "json",
+        "x": 95,
+        "y": 580,
+        "wires": [
+            []
+        ],
+        "l": false
+    },
+    {
         "id": "9c97ba56c388dfaf",
         "type": "inject",
-        "z": "790250a5.c8101",
+        "z": "2dbe54a8.332f04",
         "name": "",
         "props": [
             {
@@ -315,10 +460,10 @@
         "once": false,
         "onceDelay": 0.1,
         "topic": "/c/GameDeals",
-        "payload": "{\"community_id\":1489,\"community_name\":\"gamedeals\",\"sort\":\"New\",\"q\":\"free\"}",
+        "payload": "{\"community_id\":1489,\"community_name\":\"gamedeals\",\"sort\":\"New\",\"q\":\"free or 100\"}",
         "payloadType": "json",
         "x": 105,
-        "y": 120,
+        "y": 460,
         "wires": [
             [
                 "53d6582df57bba0f"
@@ -329,7 +474,7 @@
     {
         "id": "53d6582df57bba0f",
         "type": "http request",
-        "z": "790250a5.c8101",
+        "z": "2dbe54a8.332f04",
         "name": "lemmy.world",
         "method": "GET",
         "ret": "obj",
@@ -343,7 +488,7 @@
         "senderr": false,
         "headers": [],
         "x": 230,
-        "y": 120,
+        "y": 460,
         "wires": [
             [
                 "9051c26c9a78be01"
@@ -353,7 +498,7 @@
     {
         "id": "1a853615694a5861",
         "type": "debug",
-        "z": "790250a5.c8101",
+        "z": "2dbe54a8.332f04",
         "name": "",
         "active": true,
         "tosidebar": true,
@@ -364,14 +509,14 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 555,
-        "y": 120,
+        "y": 460,
         "wires": [],
         "l": false
     },
     {
         "id": "9051c26c9a78be01",
         "type": "function",
-        "z": "790250a5.c8101",
+        "z": "2dbe54a8.332f04",
         "name": "prepare posts",
         "func": "let posts = msg.payload.posts.map(x => {\n    x = x.post\n    let post = {\n        id: x.id,\n        postLink: x.ap_id,\n        title: x.name,\n        url: x.url,\n        published: x.published\n    }\n    return post\n})\nmsg.payload = posts\n\ndelete msg.url\ndelete msg.headers\ndelete msg.statusCode\ndelete msg.responseUrl\ndelete msg.redirectList\ndelete msg.retry\n\nreturn msg;",
         "outputs": 1,
@@ -380,7 +525,7 @@
         "finalize": "",
         "libs": [],
         "x": 420,
-        "y": 120,
+        "y": 460,
         "wires": [
             [
                 "1a853615694a5861"
@@ -634,6 +779,7 @@
         "id": "474fca24b26a8869",
         "type": "complete",
         "z": "1c9d8fd6.7a925",
+        "d": true,
         "name": "log",
         "scope": [
             "f3cac49e20cd5ab8"
@@ -676,11 +822,198 @@
         "appendNewline": true,
         "createDir": true,
         "overwriteFile": "false",
-        "encoding": "ascii",
+        "encoding": "utf8",
         "x": 420,
         "y": 540,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "8da5875d5fc460b2",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "url",
+                "v": "https://i.mjh.nz/SamsungTVPlus/all.m3u8",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "m3u",
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "3260ca7c9c4d27a2"
+            ]
+        ]
+    },
+    {
+        "id": "3260ca7c9c4d27a2",
+        "type": "http request",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 330,
+        "y": 180,
+        "wires": [
+            [
+                "da09444ba290b779"
+            ]
+        ]
+    },
+    {
+        "id": "28ed1dbcd92094f4",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 615,
+        "y": 180,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "da09444ba290b779",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "Parse",
+        "func": "if (msg.statusCode != 200 || !msg.payload) {\n    // Erreur\n    return null\n}\nlet lines = msg.payload.trim().split(/\\n/)\nif (!lines) {\n    // Erreur\n    return null\n}\nif (!lines[0].startsWith(\"#EXTM3U\")) {\n    // Erreur\n    return null\n}\ndelete msg.headers\ndelete msg.redirectList\ndelete msg.retry\n\nlet header = \"\", stream = \"\"\nlet streams = [], groups = []\nlet newStrm = false\nfor (const line of lines) {\n    if (line.startsWith(\"#EXTM3U\")) {\n        header = line\n    } else if (line.startsWith(\"#EXTINF\")) {\n        newStrm = true\n        stream = line\n    } else if (line.startsWith(\"#EXTGRP\")) {\n        groups.push(line)\n    } else if (line.startsWith(\"#\")) {\n        continue\n    } else {\n        if (!newStrm) continue\n        stream = stream + \" _|_ \" + line\n        streams.push(stream)\n    }\n}\n\nmsg.lines = lines\nmsg.header = header\nmsg.streams = streams\nmsg.groups = groups\n\nreturn msg",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 180,
+        "wires": [
+            [
+                "28ed1dbcd92094f4"
+            ]
+        ]
+    },
+    {
+        "id": "a2398c8918f23bfb",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "url",
+                "v": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "m3u",
+        "x": 150,
+        "y": 260,
+        "wires": [
+            [
+                "249e3773a95bc15d"
+            ]
+        ]
+    },
+    {
+        "id": "249e3773a95bc15d",
+        "type": "http request",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 330,
+        "y": 260,
+        "wires": [
+            [
+                "81b9d7649b7974a0"
+            ]
+        ]
+    },
+    {
+        "id": "9473ef2f5eccb2b7",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 615,
+        "y": 260,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "81b9d7649b7974a0",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "Parse",
+        "func": "if (msg.statusCode != 200 || !msg.payload) {\n    // Erreur\n    return null\n}\n\n\nconst pl = iptvPlaylist.parseM3U(msg.payload)\n\nflow.set(\"headers\", pl.headers)\nfor (const channel of pl.channels) {\n    if (channel.groupTitle === \"USA\") {\n        node.send(channel)\n    }\n}\nnode.done()\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "iptvPlaylist",
+                "module": "@iptv/playlist"
+            }
+        ],
+        "x": 490,
+        "y": 260,
+        "wires": [
+            [
+                "9473ef2f5eccb2b7"
+            ]
         ]
     },
     {
