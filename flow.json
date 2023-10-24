@@ -429,8 +429,8 @@
         "topic": "/r/GameDeals",
         "payload": "{\"restrict_sr\":\"on\",\"t\":\"week\",\"sort\":\"new\",\"limit\":25,\"q\":\"free 100\"}",
         "payloadType": "json",
-        "x": 95,
-        "y": 580,
+        "x": 105,
+        "y": 360,
         "wires": [
             []
         ],
@@ -463,7 +463,7 @@
         "payload": "{\"community_id\":1489,\"community_name\":\"gamedeals\",\"sort\":\"New\",\"q\":\"free or 100\"}",
         "payloadType": "json",
         "x": 105,
-        "y": 460,
+        "y": 680,
         "wires": [
             [
                 "53d6582df57bba0f"
@@ -488,7 +488,7 @@
         "senderr": false,
         "headers": [],
         "x": 230,
-        "y": 460,
+        "y": 680,
         "wires": [
             [
                 "9051c26c9a78be01"
@@ -509,7 +509,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 555,
-        "y": 460,
+        "y": 680,
         "wires": [],
         "l": false
     },
@@ -525,7 +525,7 @@
         "finalize": "",
         "libs": [],
         "x": 420,
-        "y": 460,
+        "y": 680,
         "wires": [
             [
                 "1a853615694a5861"
@@ -895,7 +895,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 615,
+        "x": 635,
         "y": 180,
         "wires": [],
         "l": false
@@ -912,7 +912,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 490,
+        "x": 510,
         "y": 180,
         "wires": [
             [
@@ -928,11 +928,6 @@
         "props": [
             {
                 "p": "topic",
-                "vt": "str"
-            },
-            {
-                "p": "url",
-                "v": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
                 "vt": "str"
             }
         ],
@@ -953,11 +948,11 @@
         "id": "249e3773a95bc15d",
         "type": "http request",
         "z": "9fd980df2da67037",
-        "name": "",
+        "name": "PlutoTV-us",
         "method": "GET",
         "ret": "txt",
         "paytoqs": "ignore",
-        "url": "",
+        "url": "https://i.mjh.nz/PlutoTV/us.m3u8",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -986,7 +981,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 615,
+        "x": 795,
         "y": 260,
         "wires": [],
         "l": false
@@ -996,7 +991,7 @@
         "type": "function",
         "z": "9fd980df2da67037",
         "name": "Parse",
-        "func": "if (msg.statusCode != 200 || !msg.payload) {\n    // Erreur\n    return null\n}\n\n\nconst pl = iptvPlaylist.parseM3U(msg.payload)\n\nflow.set(\"headers\", pl.headers)\nfor (const channel of pl.channels) {\n    if (channel.groupTitle === \"USA\") {\n        node.send(channel)\n    }\n}\nnode.done()\n",
+        "func": "if (msg.statusCode != 200 || !msg.payload) {\n    // Erreur\n    node.error(\"HTTP request error\", msg);\n    return null\n}\nconst pl = iptvPlaylist.parseM3U(msg.payload)\n\nnode.send({topic: \"headers\", headers: pl.headers})\n// node.send([null, pl])\n\nfor (const channel of pl.channels) {\n    const GROUPS = new Set([\"Reality\", \"Big Brother Live\", \"Game Shows\", \"Daytime TV\",\n        \"News + Opinion\", \"Food\", \"Kids\", \"Gaming + Anime\", \"En Español\", \"Local News\"\n    ])\n    if (GROUPS.has(channel.groupTitle)) {\n        continue\n    }\n\n    const NAME = new Set([\n        \"BET Pluto TV\", \"BET Her\", \"OUTtv Proud\"\n    ])\n    if (NAME.has(channel.name)) {\n        continue\n    }\n    channel.topic = \"channel\"\n    node.send(channel)\n}\nnode.send({topic: \"end\"})\nnode.done()\n",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -1008,7 +1003,27 @@
                 "module": "@iptv/playlist"
             }
         ],
-        "x": 490,
+        "x": 510,
+        "y": 260,
+        "wires": [
+            [
+                "6d638b5fad1543f3"
+            ]
+        ]
+    },
+    {
+        "id": "6d638b5fad1543f3",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "join",
+        "func": "if (msg.topic == \"headers\") {\n    context.set(\"headers\", msg.headers)\n}\nif (msg.topic == \"channel\") {\n    const channels = context.get(\"channels\") ?? []\n    channels.push(msg)\n    context.set(\"channels\", channels)\n}\nif (msg.topic == \"end\") {\n    const headers = context.get(\"headers\") ?? {}\n    const channels = context.get(\"channels\") ?? []\n    if (channels.length) {\n        let msg = {\n            topic: \"playlist\",\n            headers: headers,\n            channels: channels\n        }\n        return msg\n    }\n    return null\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set(\"headers\", null)\ncontext.set(\"channels\", null)\n",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
         "y": 260,
         "wires": [
             [
