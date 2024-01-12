@@ -22,12 +22,281 @@
         "env": []
     },
     {
+        "id": "c58e172c38c3f313",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "608d48c1c2c08ca6",
         "type": "tab",
         "label": "Flow 1",
         "disabled": false,
         "info": "",
         "env": []
+    },
+    {
+        "id": "0f2dc18bd6b60182",
+        "type": "subflow",
+        "name": "parse m3u",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 80,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "65ce5291fc0e55f7"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 660,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "8c392935b3941576",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "c6b97c003c4dd14e",
+        "type": "subflow",
+        "name": "write m3u",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 200,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "6d638b5fad1543f3"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 720,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "5ed518848689dc94",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "450e85d3c4e887ef",
+        "type": "Stackhero-MySQL-Server",
+        "name": "mariadb",
+        "host": "mariadb",
+        "port": "3306",
+        "tls": false,
+        "database": "iptv"
+    },
+    {
+        "id": "ed5efe6d8e7741eb",
+        "type": "server",
+        "name": "homeassistant.iot",
+        "version": 5,
+        "addon": false,
+        "rejectUnauthorizedCerts": true,
+        "ha_boolean": "y|yes|true|on|home|open",
+        "connectionDelay": true,
+        "cacheJson": true,
+        "heartbeat": false,
+        "heartbeatInterval": "30",
+        "areaSelector": "friendlyName",
+        "deviceSelector": "friendlyName",
+        "entitySelector": "friendlyName",
+        "statusSeparator": ": ",
+        "statusYear": "hidden",
+        "statusMonth": "short",
+        "statusDay": "numeric",
+        "statusHourCycle": "default",
+        "statusTimeFormat": "h:m",
+        "enableGlobalContextStore": false
+    },
+    {
+        "id": "715fcfcd8e2590e1",
+        "type": "ha-device-config",
+        "name": "Peripherique mystere",
+        "hwVersion": "00000000.1",
+        "manufacturer": "Node-RED",
+        "model": "inconnu",
+        "swVersion": "0.1b"
+    },
+    {
+        "id": "65ce5291fc0e55f7",
+        "type": "http request",
+        "z": "0f2dc18bd6b60182",
+        "name": "[get] m3u",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 200,
+        "y": 80,
+        "wires": [
+            [
+                "a85a1ec5ebd49c1e"
+            ]
+        ]
+    },
+    {
+        "id": "a85a1ec5ebd49c1e",
+        "type": "function",
+        "z": "0f2dc18bd6b60182",
+        "name": "parse",
+        "func": "if (msg.statusCode != 200 || !msg.payload) {\n    // Erreur\n    node.error(\"HTTP request error\", msg);\n    return null\n}\nconst pl = iptvPlaylist.parseM3U(msg.payload)\nmsg.topic = \"headers\"\nmsg.payload = {headers: pl.headers}\nnode.send(msg)\n\nfor (const channel of pl.channels) {\n    let newmsg = {\n        topic: \"channel\",\n        payload: channel\n    }\n    node.send(newmsg)\n}\nnode.send({topic: \"end\"})\nnode.done()\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "iptvPlaylist",
+                "module": "@iptv/playlist"
+            }
+        ],
+        "x": 350,
+        "y": 80,
+        "wires": [
+            [
+                "8c392935b3941576"
+            ]
+        ]
+    },
+    {
+        "id": "8c392935b3941576",
+        "type": "change",
+        "z": "0f2dc18bd6b60182",
+        "name": "",
+        "rules": [
+            {
+                "t": "delete",
+                "p": "headers",
+                "pt": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "responseUrl",
+                "pt": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "statusCode",
+                "pt": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "redirectList",
+                "pt": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "retry",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 520,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6d638b5fad1543f3",
+        "type": "function",
+        "z": "c6b97c003c4dd14e",
+        "name": "join",
+        "func": "if (msg.topic == \"headers\") {\n    context.set(\"headers\", msg)\n}\nif (msg.topic == \"channel\") {\n    const channels = context.get(\"channels\") ?? []\n    channels.push(msg.payload)\n    context.set(\"channels\", channels)\n}\nif (msg.topic == \"end\") {\n    const newmsg = context.get(\"headers\") ?? {}\n    const channels = context.get(\"channels\") ?? []\n    if (channels.length) {\n        newmsg.topic = \"playlist\"\n        newmsg.payload.channels = channels\n        return newmsg\n    }\n    return null\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set(\"headers\", null)\ncontext.set(\"channels\", null)\n",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 80,
+        "wires": [
+            [
+                "6e8c5c28b302c6cd"
+            ]
+        ]
+    },
+    {
+        "id": "6e8c5c28b302c6cd",
+        "type": "function",
+        "z": "c6b97c003c4dd14e",
+        "name": "stringify",
+        "func": "if (msg.topic == \"playlist\"){\n    const pl = msg.payload\n    pl.headers[\"x-tvg-url\"] = pl.headers[\"xTvgUrl\"]\n    delete pl.headers[\"xTvgUrl\"]\n\n    const m3u = iptvPlaylist.writeM3U(pl)\n    msg.topic = \"m3u\"\n    msg.playlist = pl\n    msg.payload = m3u\n    return msg\n}\nreturn null",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "iptvPlaylist",
+                "module": "@iptv/playlist"
+            }
+        ],
+        "x": 460,
+        "y": 80,
+        "wires": [
+            [
+                "5ed518848689dc94"
+            ]
+        ]
+    },
+    {
+        "id": "5ed518848689dc94",
+        "type": "file",
+        "z": "c6b97c003c4dd14e",
+        "name": "write",
+        "filename": "filename",
+        "filenameType": "msg",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 610,
+        "y": 80,
+        "wires": [
+            []
+        ]
     },
     {
         "id": "63d893f4.3e39a4",
@@ -139,8 +408,8 @@
         "id": "a3151e79522adcbf",
         "type": "http in",
         "z": "2dbe54a8.332f04",
-        "name": "[get] /gamedeals.html",
-        "url": "/gamedeals.html",
+        "name": "[get] gamedeals.html",
+        "url": "/games/gamedeals.html",
         "method": "get",
         "upload": false,
         "swaggerDoc": "",
@@ -361,8 +630,8 @@
         "id": "9533eb590b9a4b8c",
         "type": "comment",
         "z": "2dbe54a8.332f04",
-        "name": "https://nodered.iot/app/GameDeals.html",
-        "info": "https://nodered.iot/app/GameDeals.html",
+        "name": "http://nodered.iot/games/gamedeals.html",
+        "info": "http://nodered.iot/games/gamedeals.html",
         "x": 320,
         "y": 360,
         "wires": []
@@ -460,7 +729,7 @@
         "once": false,
         "onceDelay": 0.1,
         "topic": "/c/GameDeals",
-        "payload": "{\"community_id\":1489,\"community_name\":\"gamedeals\",\"sort\":\"New\",\"q\":\"free or 100\"}",
+        "payload": "{\"community_name\":\"gamedeals\",\"sort\":\"New\",\"q\":\"free or 100\"}",
         "payloadType": "json",
         "x": 105,
         "y": 680,
@@ -785,8 +1054,8 @@
             "f3cac49e20cd5ab8"
         ],
         "uncaught": false,
-        "x": 110,
-        "y": 540,
+        "x": 670,
+        "y": 120,
         "wires": [
             [
                 "3964538f7a598aed"
@@ -804,8 +1073,8 @@
         "syntax": "mustache",
         "template": "{{{payload}}}",
         "output": "str",
-        "x": 260,
-        "y": 540,
+        "x": 820,
+        "y": 120,
         "wires": [
             [
                 "1660c3d44194082d"
@@ -823,101 +1092,10 @@
         "createDir": true,
         "overwriteFile": "false",
         "encoding": "utf8",
-        "x": 420,
-        "y": 540,
+        "x": 980,
+        "y": 120,
         "wires": [
             []
-        ]
-    },
-    {
-        "id": "8da5875d5fc460b2",
-        "type": "inject",
-        "z": "9fd980df2da67037",
-        "name": "",
-        "props": [
-            {
-                "p": "topic",
-                "vt": "str"
-            },
-            {
-                "p": "url",
-                "v": "https://i.mjh.nz/SamsungTVPlus/all.m3u8",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "m3u",
-        "x": 150,
-        "y": 180,
-        "wires": [
-            [
-                "3260ca7c9c4d27a2"
-            ]
-        ]
-    },
-    {
-        "id": "3260ca7c9c4d27a2",
-        "type": "http request",
-        "z": "9fd980df2da67037",
-        "name": "",
-        "method": "GET",
-        "ret": "txt",
-        "paytoqs": "ignore",
-        "url": "",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 330,
-        "y": 180,
-        "wires": [
-            [
-                "da09444ba290b779"
-            ]
-        ]
-    },
-    {
-        "id": "28ed1dbcd92094f4",
-        "type": "debug",
-        "z": "9fd980df2da67037",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 635,
-        "y": 180,
-        "wires": [],
-        "l": false
-    },
-    {
-        "id": "da09444ba290b779",
-        "type": "function",
-        "z": "9fd980df2da67037",
-        "name": "Parse",
-        "func": "if (msg.statusCode != 200 || !msg.payload) {\n    // Erreur\n    return null\n}\nlet lines = msg.payload.trim().split(/\\n/)\nif (!lines) {\n    // Erreur\n    return null\n}\nif (!lines[0].startsWith(\"#EXTM3U\")) {\n    // Erreur\n    return null\n}\ndelete msg.headers\ndelete msg.redirectList\ndelete msg.retry\n\nlet header = \"\", stream = \"\"\nlet streams = [], groups = []\nlet newStrm = false\nfor (const line of lines) {\n    if (line.startsWith(\"#EXTM3U\")) {\n        header = line\n    } else if (line.startsWith(\"#EXTINF\")) {\n        newStrm = true\n        stream = line\n    } else if (line.startsWith(\"#EXTGRP\")) {\n        groups.push(line)\n    } else if (line.startsWith(\"#\")) {\n        continue\n    } else {\n        if (!newStrm) continue\n        stream = stream + \" _|_ \" + line\n        streams.push(stream)\n    }\n}\n\nmsg.lines = lines\nmsg.header = header\nmsg.streams = streams\nmsg.groups = groups\n\nreturn msg",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 510,
-        "y": 180,
-        "wires": [
-            [
-                "28ed1dbcd92094f4"
-            ]
         ]
     },
     {
@@ -927,7 +1105,13 @@
         "name": "m3u",
         "props": [
             {
-                "p": "topic",
+                "p": "url",
+                "v": "https://i.mjh.nz/PlutoTV/us.m3u8",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/i.mjh.nz-plutotv-us.m3u8",
                 "vt": "str"
             }
         ],
@@ -935,36 +1119,12 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "topic": "m3u",
-        "x": 150,
-        "y": 260,
+        "topic": "",
+        "x": 130,
+        "y": 300,
         "wires": [
             [
-                "249e3773a95bc15d"
-            ]
-        ]
-    },
-    {
-        "id": "249e3773a95bc15d",
-        "type": "http request",
-        "z": "9fd980df2da67037",
-        "name": "PlutoTV-us",
-        "method": "GET",
-        "ret": "txt",
-        "paytoqs": "ignore",
-        "url": "https://i.mjh.nz/PlutoTV/us.m3u8",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 330,
-        "y": 260,
-        "wires": [
-            [
-                "81b9d7649b7974a0"
+                "9303569c258e73e8"
             ]
         ]
     },
@@ -981,53 +1141,1291 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 795,
-        "y": 260,
+        "x": 695,
+        "y": 300,
         "wires": [],
         "l": false
     },
     {
-        "id": "81b9d7649b7974a0",
+        "id": "35e298a4bde4394e",
         "type": "function",
         "z": "9fd980df2da67037",
-        "name": "Parse",
-        "func": "if (msg.statusCode != 200 || !msg.payload) {\n    // Erreur\n    node.error(\"HTTP request error\", msg);\n    return null\n}\nconst pl = iptvPlaylist.parseM3U(msg.payload)\n\nnode.send({topic: \"headers\", headers: pl.headers})\n// node.send([null, pl])\n\nfor (const channel of pl.channels) {\n    const GROUPS = new Set([\"Reality\", \"Big Brother Live\", \"Game Shows\", \"Daytime TV\",\n        \"News + Opinion\", \"Food\", \"Kids\", \"Gaming + Anime\", \"En Español\", \"Local News\"\n    ])\n    if (GROUPS.has(channel.groupTitle)) {\n        continue\n    }\n\n    const NAME = new Set([\n        \"BET Pluto TV\", \"BET Her\", \"OUTtv Proud\"\n    ])\n    if (NAME.has(channel.name)) {\n        continue\n    }\n    channel.topic = \"channel\"\n    node.send(channel)\n}\nnode.send({topic: \"end\"})\nnode.done()\n",
+        "name": "filter",
+        "func": "if (msg.topic == \"channel\") {\n    let channel = msg.payload\n\n    let names = new Set([\n        \"Fight\", \"Bellator MMA\", \"PFL MMA\",\n        \"IMPACT Wrestling\", \"GLORY Kickboxing\",\n    ])\n    let groups = new Set([\"Reality\", \"Big Brother Live\",\n        \"Game Shows\", \"Daytime TV\", \"Sports\", \"News + Opinion\",\n        \"Food\", \"Kids\", \"Gaming + Anime\", \"En Español\",\n        \"Local News\", \"Home\"\n    ])\n    if (groups.has(channel.groupTitle && !names.has(channel.name))) {\n        return null\n    }\n\n    names = new Set([\n        \"BET Pluto TV\", \"BET Her\", \"OUTtv Proud\",\n        \"Dogs 24/7\", \"Cats 24/7\", \"Faith TV\",\n        \"TBN\", \"CMT Equal Play\"\n    ])\n    if (names.has(channel.name)) {\n        return null\n    }\n\n    delete channel.extras[\"tvg-chno\"]\n    channel.name = channel.name += \" pt-us\"\n}\nreturn msg",
         "outputs": 1,
-        "timeout": "",
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 300,
+        "wires": [
+            [
+                "18efedd335b894e2"
+            ]
+        ]
+    },
+    {
+        "id": "47c1ad728e4627e1",
+        "type": "file in",
+        "z": "9fd980df2da67037",
+        "name": "i.mjh.nz-plutotv-us.m3u8",
+        "filename": "/workspace/iptv/i.mjh.nz-plutotv-us.m3u8",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 850,
+        "y": 260,
+        "wires": [
+            [
+                "bd550956093ad4f9"
+            ]
+        ]
+    },
+    {
+        "id": "741b4e2e04058fe8",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "i.mjh.nz-plutotv-us",
+        "url": "/iptv/i.mjh.nz-plutotv-us.m3u",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 590,
+        "y": 260,
+        "wires": [
+            [
+                "47c1ad728e4627e1"
+            ]
+        ]
+    },
+    {
+        "id": "bd550956093ad4f9",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {
+            "content-type": "text/plain"
+        },
+        "x": 1070,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "ceab6718eef92516",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv/i.mjh.nz-plutotv-us.m3u8",
+        "info": "http://nodered.iot/iptv/i.mjh.nz-plutotv-us.m3u8",
+        "x": 260,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "9303569c258e73e8",
+        "type": "subflow:0f2dc18bd6b60182",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 280,
+        "y": 300,
+        "wires": [
+            [
+                "35e298a4bde4394e"
+            ]
+        ]
+    },
+    {
+        "id": "18efedd335b894e2",
+        "type": "subflow:c6b97c003c4dd14e",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 580,
+        "y": 300,
+        "wires": [
+            [
+                "9473ef2f5eccb2b7"
+            ]
+        ]
+    },
+    {
+        "id": "2754bcd7ef25b3d3",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://i.mjh.nz/PlutoTV/fr.m3u8",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/i.mjh.nz-plutotv-fr.m3u8",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 460,
+        "wires": [
+            [
+                "a52a676dba5816f8"
+            ]
+        ]
+    },
+    {
+        "id": "448c61caa53faa7d",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 695,
+        "y": 460,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "6a53a3f0a11467c0",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "filter",
+        "func": "if (msg.topic == \"channel\") {\n    let channel = msg.payload\n\n    let names = new Set([\n        \"Gaming TV\", \"IGN\", \"Pluto TV Yoga\", \"Wellbeing TV\",\n    ])\n    if (names.has(channel.name)) {\n        return null\n    }\n\n    let groups = new Set([\n        \"Animation & Gaming\", \"TV Réalité\", \"Divertissement\",\n        \"Kids Max\", \"Kids\", \"Sports & Auto\", //\"News & Info\",\n        \"100% Français\"\n    ])\n    if (groups.has(channel.groupTitle)) {\n        return null\n    }\n\n    names = new Set([\n        \"South Park\", \"One Piece\"\n    ])\n    if (names.has(channel.name)) {\n        channel.groupTitle = \"Animation\"\n        return msg\n    }\n\n    delete channel.extras[\"tvg-chno\"]\n    channel.name = channel.name += \" pt-fr\"\n}\nreturn msg",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 460,
+        "wires": [
+            [
+                "0ee11473d207691a"
+            ]
+        ]
+    },
+    {
+        "id": "aa5df3a0832c1714",
+        "type": "file in",
+        "z": "9fd980df2da67037",
+        "name": "i.mjh.nz-plutotv-us.m3u8",
+        "filename": "/workspace/iptv/i.mjh.nz-plutotv-us.m3u8",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 850,
+        "y": 420,
+        "wires": [
+            [
+                "e290c025c82831ce"
+            ]
+        ]
+    },
+    {
+        "id": "b463780fd8481b4e",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "i.mjh.nz-plutotv-fr",
+        "url": "/iptv/i.mjh.nz-plutotv-fr.m3u",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 580,
+        "y": 420,
+        "wires": [
+            [
+                "aa5df3a0832c1714"
+            ]
+        ]
+    },
+    {
+        "id": "e290c025c82831ce",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1070,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "5137982cac7e9a24",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv/i.mjh.nz-plutotv-fr.m3u8",
+        "info": "http://nodered.iot/iptv/i.mjh.nz-plutotv-fr.m3u8",
+        "x": 250,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "a52a676dba5816f8",
+        "type": "subflow:0f2dc18bd6b60182",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 280,
+        "y": 460,
+        "wires": [
+            [
+                "6a53a3f0a11467c0"
+            ]
+        ]
+    },
+    {
+        "id": "0ee11473d207691a",
+        "type": "subflow:c6b97c003c4dd14e",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 580,
+        "y": 460,
+        "wires": [
+            [
+                "448c61caa53faa7d"
+            ]
+        ]
+    },
+    {
+        "id": "cb60548db8a16097",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://quebectele.com/canada.m3u",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/quebectele.com-ca.m3u",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 940,
+        "wires": [
+            [
+                "194466d6d3faf704"
+            ]
+        ]
+    },
+    {
+        "id": "45d3171e239a100e",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 695,
+        "y": 940,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "eaae28a6dd3729d0",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "filter",
+        "func": "if (msg.topic == \"channel\") {\n    let channel = msg.payload\n\n    let names = new Set ([\n        \"ICI Télé Est\", \"ICI Télé Ouest\", \"Canal Savoir\",\n        \"ICI Télé Acadie\", \"ICI Télé Alberta\", \"ICI Télé CB-Yukon\",\n        \"ICI Télé Est-Québec\", \"ICI Télé Estrie\", \"ICI Télé Manitoba\",\n        \"ICI Télé Mauricie\", \"ICI Télé Ontario\", \"ICI Télé Ottawa-Gatineau\",\n        \"ICI Télé Québec\", \"ICI Télé Saguenay\", \"ICI Télé Saskatchewan\",\n        \"RogersTV Moncton Français\", \"RogersTV Edmundston Français\",\n        \"RogersTV Ottawa Français\", \"Assemblée Nationale du QC\",\n        \"Ontario OLA Network | FR\", \"CPAC FR\"\n    ])\n    if (names.has(channel.name))\n        return null\n\n    if (channel.groupTitle == \"📺 Canada English\")\n        return null\n\n    if (channel.groupTitle == \"📺 Canada Français\")\n        channel.groupTitle = \"Canada Français\"\n\n    if (channel.groupTitle == \"📻 Radio Québécoise\")\n        channel.groupTitle = \"Radio Québécoise\"\n\n    if (channel.groupTitle == \"📺 Stingray Music\")\n        channel.groupTitle = \"Stingray Music\"\n\n    if (channel.groupTitle == \"📻 Music Bands\")\n        channel.groupTitle = \"Music Bands\"\n\n    if (channel.groupTitle == \"📻 181FM\")\n        channel.groupTitle = \"181FM\"\n\n    if (channel.groupTitle == \"📻 iHeart Radio\")\n        channel.groupTitle = \"iHeart Radio\"\n\n    if (channel.groupTitle == \"📻 Dash Radio\")\n        channel.groupTitle = \"Dash Radio\"\n\n    let groups = new Set([\n        \"Radio Québécoise\", \"Stingray Music\", \"Music Bands\",\n        \"181FM\", \"iHeart Radio\", \"Dash Radio\"\n    ])\n    if (groups.has(channel.groupTitle)) {\n        channel.extras.radio = true\n    }\n\n    delete channel.extras[\"tvg-chno\"]\n    channel.name = channel.name += \" qt-fr\"\n}\nreturn msg",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 940,
+        "wires": [
+            [
+                "9b4c5cdf6f18fa26"
+            ]
+        ]
+    },
+    {
+        "id": "a539a63f1094d9f7",
+        "type": "file in",
+        "z": "9fd980df2da67037",
+        "name": "quebectele.com-ca.m3u",
+        "filename": "/workspace/iptv/quebectele.com-ca.m3u",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 850,
+        "y": 900,
+        "wires": [
+            [
+                "910aa3e963d45289"
+            ]
+        ]
+    },
+    {
+        "id": "d2400c06e56a852a",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "quebectele.com-ca",
+        "url": "/iptv/quebectele.com-ca.m3u",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 590,
+        "y": 900,
+        "wires": [
+            [
+                "a539a63f1094d9f7"
+            ]
+        ]
+    },
+    {
+        "id": "910aa3e963d45289",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1070,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "10b64747fc417777",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv/quebectele-ca.m3u",
+        "info": "http://nodered.iot/iptv/quebectele-ca.m3u",
+        "x": 240,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "194466d6d3faf704",
+        "type": "subflow:0f2dc18bd6b60182",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 280,
+        "y": 940,
+        "wires": [
+            [
+                "eaae28a6dd3729d0"
+            ]
+        ]
+    },
+    {
+        "id": "9b4c5cdf6f18fa26",
+        "type": "subflow:c6b97c003c4dd14e",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 580,
+        "y": 940,
+        "wires": [
+            [
+                "45d3171e239a100e"
+            ]
+        ]
+    },
+    {
+        "id": "ad791b91f63ffe16",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://i.mjh.nz/SamsungTVPlus/us.m3u8",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/i.mjh.nz-samsungtv-us.m3u8",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 620,
+        "wires": [
+            [
+                "82ab303896f18dec"
+            ]
+        ]
+    },
+    {
+        "id": "d31a26c3c85c197d",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 695,
+        "y": 620,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "9c91ee674a39766e",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "filter",
+        "func": "if (msg.topic == \"channel\") {\n    let channel = msg.payload\n\n    let names = new Set([\n        \"Nosey\", \"Divorce Court\", \"The Bob Ross Channel\",\n        \"BET Pluto TV\", \"Ebony TV by Lionsgate\", \"ALLBLK Gems\",\n\n    ])\n    if (names.has(channel.name)) {\n        return null\n    }\n\n    let groups = new Set([\n        \"News & Opinion\", \"Game Shows\", \"Sports\",\n        \"Food, Home & Travel\", \"Reality TV\", \"Latino\",\n        \"Reality Competition\", \"Kids\", \n    ])\n    if (groups.has(channel.groupTitle)) {\n        return null\n    }\n\n    delete channel.extras[\"tvg-chno\"]\n    channel.name = channel.name += \" st-us\"\n}\nreturn msg",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 620,
+        "wires": [
+            [
+                "b3a8921428003c90"
+            ]
+        ]
+    },
+    {
+        "id": "bd6d12791ccf7d87",
+        "type": "file in",
+        "z": "9fd980df2da67037",
+        "name": "i.mjh.nz-samsungtv-us.m3u8",
+        "filename": "/workspace/iptv/i.mjh.nz-samsungtv-us.m3u8",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 860,
+        "y": 580,
+        "wires": [
+            [
+                "9305556581e90ce2"
+            ]
+        ]
+    },
+    {
+        "id": "cc9858b60b1ab350",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "i.mjh.nz-samsungtv-us",
+        "url": "/iptv/i.mjh.nz-samsungtv-us.m3u",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 600,
+        "y": 580,
+        "wires": [
+            [
+                "bd6d12791ccf7d87"
+            ]
+        ]
+    },
+    {
+        "id": "9305556581e90ce2",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1070,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "aa9d51c459eca468",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv/i.mjh.nz-samsungtv-us.m3u8",
+        "info": "http://nodered.iot/iptv/i.mjh.nz-samsungtv-us.m3u8",
+        "x": 270,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "82ab303896f18dec",
+        "type": "subflow:0f2dc18bd6b60182",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 280,
+        "y": 620,
+        "wires": [
+            [
+                "9c91ee674a39766e"
+            ]
+        ]
+    },
+    {
+        "id": "b3a8921428003c90",
+        "type": "subflow:c6b97c003c4dd14e",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 580,
+        "y": 620,
+        "wires": [
+            [
+                "d31a26c3c85c197d"
+            ]
+        ]
+    },
+    {
+        "id": "6828c4b5ff9d8325",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://i.mjh.nz/SamsungTVPlus/fr.m3u8",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/i.mjh.nz-samsungtv-fr.m3u8",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 780,
+        "wires": [
+            [
+                "86fb9dc390b159f0"
+            ]
+        ]
+    },
+    {
+        "id": "acecef3740e7636d",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 695,
+        "y": 780,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "2539a3fa8ab77ca4",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "filter",
+        "func": "if (msg.topic == \"channel\") {\n    let channel = msg.payload\n\n    let names = new Set([\n        \"Televisa TeleNovelas\", \"Stormcast Novelas\",\n        \"Passion Novelas\", \"Fréquence Novelas\", \"Tele.Novela\"\n    ])\n    if (names.has(channel.name)) {\n        return null\n    }\n\n    let groups = new Set([\n        \"Divertissement\", \"Gastronomie\", \"Sport\", \"Jeunesse\",\n        \"LifeStyle\" //, \"Actualités\"\n    ])\n    if (groups.has(channel.groupTitle)) {\n        return null\n    }\n\n    delete channel.extras[\"tvg-chno\"]\n    channel.name = channel.name += \" st-fr\"\n}\nreturn msg",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 780,
+        "wires": [
+            [
+                "684171d2845ec474"
+            ]
+        ]
+    },
+    {
+        "id": "e424aa0738492b95",
+        "type": "file in",
+        "z": "9fd980df2da67037",
+        "name": "i.mjh.nz-samsungtv-fr.m3u8",
+        "filename": "/workspace/iptv/i.mjh.nz-samsungtv-fr.m3u8",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 860,
+        "y": 740,
+        "wires": [
+            [
+                "d191ba2860054bd8"
+            ]
+        ]
+    },
+    {
+        "id": "8507d9558b6551da",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "i.mjh.nz-samsungtv-fr",
+        "url": "/iptv/i.mjh.nz-samsungtv-fr.m3u",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 600,
+        "y": 740,
+        "wires": [
+            [
+                "e424aa0738492b95"
+            ]
+        ]
+    },
+    {
+        "id": "d191ba2860054bd8",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1070,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "45e6b69358db6637",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv/i.mjh.nz-samsungtv-fr.m3u8",
+        "info": "http://nodered.iot/iptv/i.mjh.nz-samsungtv-fr.m3u8",
+        "x": 260,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "86fb9dc390b159f0",
+        "type": "subflow:0f2dc18bd6b60182",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 280,
+        "y": 780,
+        "wires": [
+            [
+                "2539a3fa8ab77ca4"
+            ]
+        ]
+    },
+    {
+        "id": "684171d2845ec474",
+        "type": "subflow:c6b97c003c4dd14e",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 580,
+        "y": 780,
+        "wires": [
+            [
+                "acecef3740e7636d"
+            ]
+        ]
+    },
+    {
+        "id": "06dcdb5e06351f57",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "[get] /iptv/",
+        "url": "/iptv",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 120,
+        "wires": [
+            [
+                "b848cb48963f6475"
+            ]
+        ]
+    },
+    {
+        "id": "b848cb48963f6475",
+        "type": "exec",
+        "z": "9fd980df2da67037",
+        "command": "ls /workspace/iptv/",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": true,
+        "oldrc": false,
+        "name": "ls iptv",
+        "x": 290,
+        "y": 120,
+        "wires": [
+            [
+                "3df36e4bdec5c231"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "db5f4fcfc40aea35",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 80,
+        "wires": [
+            [
+                "b848cb48963f6475"
+            ]
+        ]
+    },
+    {
+        "id": "3e227f9.1d26",
+        "type": "template",
+        "z": "9fd980df2da67037",
+        "name": "create dir index",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<html>\n<body>\n<h1>Directory Index</h1>\n{{#files}}\n    <div><a href=\"http://nodered.iot/iptv/{{{.}}}\">http://nodered.iot/iptv/{{{.}}}</a></div>\n{{/files}}\n</body>\n</html>",
+        "output": "str",
+        "x": 660,
+        "y": 120,
+        "wires": [
+            [
+                "27e8da3f0be8acd6"
+            ]
+        ]
+    },
+    {
+        "id": "3df36e4bdec5c231",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "function 1",
+        "func": "const files = msg.payload.trim().split(os.EOL)\nmsg.payload = \"\"\nmsg.payload.files = msg.files = files\n\n// for (let file of files) {\n//     msg.files.push(file)\n// }\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [
             {
-                "var": "iptvPlaylist",
-                "module": "@iptv/playlist"
+                "var": "os",
+                "module": "os"
             }
         ],
-        "x": 510,
-        "y": 260,
+        "x": 460,
+        "y": 120,
         "wires": [
             [
-                "6d638b5fad1543f3"
+                "3e227f9.1d26"
             ]
         ]
     },
     {
-        "id": "6d638b5fad1543f3",
+        "id": "27e8da3f0be8acd6",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 850,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "cb93b4b1f4673084",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://iptv-org.github.io/iptv/subdivisions/ca-qc.m3u",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/iptv-org-ca-qc.m3u",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 1100,
+        "wires": [
+            [
+                "e2fc70a4eb4ed9c7"
+            ]
+        ]
+    },
+    {
+        "id": "7c8971e7af07a263",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 695,
+        "y": 1100,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "d39b81bcd45258e2",
         "type": "function",
         "z": "9fd980df2da67037",
-        "name": "join",
-        "func": "if (msg.topic == \"headers\") {\n    context.set(\"headers\", msg.headers)\n}\nif (msg.topic == \"channel\") {\n    const channels = context.get(\"channels\") ?? []\n    channels.push(msg)\n    context.set(\"channels\", channels)\n}\nif (msg.topic == \"end\") {\n    const headers = context.get(\"headers\") ?? {}\n    const channels = context.get(\"channels\") ?? []\n    if (channels.length) {\n        let msg = {\n            topic: \"playlist\",\n            headers: headers,\n            channels: channels\n        }\n        return msg\n    }\n    return null\n}\n",
+        "name": "filter",
+        "func": "if (msg.topic == \"channel\") {\n    let channel = msg.payload\n\n    // let names = new Set([\n    //     \"Televisa TeleNovelas\", \"Stormcast Novelas\",\n    //     \"Passion Novelas\", \"Fréquence Novelas\", \"Tele.Novela\"\n    // ])\n    // if (names.has(channel.name)) {\n    //     return null\n    // }\n\n    let groups = new Set([\n        \"Business\", \"Gastronomie\", \"Sport\", \"Jeunesse\",\n        \"LifeStyle\" //, \"Actualités\"\n    ])\n    if (groups.has(channel.groupTitle)) {\n        return null\n    }\n\n    // delete channel.extras[\"tvg-chno\"]\n    // channel.name = channel.name += \" iptv-org\"\n}\nreturn msg",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
-        "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set(\"headers\", null)\ncontext.set(\"channels\", null)\n",
+        "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 670,
-        "y": 260,
+        "x": 430,
+        "y": 1100,
         "wires": [
             [
-                "9473ef2f5eccb2b7"
+                "ab137a27d479e1c8"
+            ]
+        ]
+    },
+    {
+        "id": "dd805d9d5f2dfbea",
+        "type": "file in",
+        "z": "9fd980df2da67037",
+        "name": "iptv-org-ca-qc.m3u",
+        "filename": "/workspace/iptv/iptv-org-ca-qc.m3u",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 830,
+        "y": 1060,
+        "wires": [
+            [
+                "3a4d183a1467b3e1"
+            ]
+        ]
+    },
+    {
+        "id": "4479d6378e1773b9",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "iptv-org-ca-qc.m3u",
+        "url": "/iptv/iptv-org-ca-qc.m3u",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 590,
+        "y": 1060,
+        "wires": [
+            [
+                "dd805d9d5f2dfbea"
+            ]
+        ]
+    },
+    {
+        "id": "3a4d183a1467b3e1",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1070,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "4b2491645cb31846",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv/iptv-org-ca-qc.m3u",
+        "info": "http://nodered.iot/iptv/iptv-org-ca-qc.m3u",
+        "x": 240,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "e2fc70a4eb4ed9c7",
+        "type": "subflow:0f2dc18bd6b60182",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 280,
+        "y": 1100,
+        "wires": [
+            [
+                "d39b81bcd45258e2"
+            ]
+        ]
+    },
+    {
+        "id": "ab137a27d479e1c8",
+        "type": "subflow:c6b97c003c4dd14e",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 580,
+        "y": 1100,
+        "wires": [
+            [
+                "7c8971e7af07a263"
+            ]
+        ]
+    },
+    {
+        "id": "a3d053782f89b3e2",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://iptv-org.github.io/iptv/countries/us.m3u",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/iptv-org-us.m3u",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 1260,
+        "wires": [
+            [
+                "995cb1ad4e917188"
+            ]
+        ]
+    },
+    {
+        "id": "97510212b99c9c28",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 695,
+        "y": 1260,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "e1e36196f8d283b4",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "filter",
+        "func": "if (msg.topic == \"channel\") {\n    let channel = msg.payload\n\n    // let names = new Set([\n    //     \"Televisa TeleNovelas\", \"Stormcast Novelas\",\n    //     \"Passion Novelas\", \"Fréquence Novelas\", \"Tele.Novela\"\n    // ])\n    // if (names.has(channel.name)) {\n    //     return null\n    // }\n\n    let groups = new Set([\n        \"Business\", \"Gastronomie\", \"Sport\", \"Jeunesse\",\n        \"LifeStyle\" //, \"Actualités\"\n    ])\n    if (groups.has(channel.groupTitle)) {\n        return null\n    }\n\n    // delete channel.extras[\"tvg-chno\"]\n    // channel.name = channel.name += \" iptv-org\"\n}\nreturn msg",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 1260,
+        "wires": [
+            [
+                "723fd82bb19c040d"
+            ]
+        ]
+    },
+    {
+        "id": "c3126eeaf87852a5",
+        "type": "file in",
+        "z": "9fd980df2da67037",
+        "name": "iptv-org-us.m3u",
+        "filename": "/workspace/iptv/iptv-org-us.m3u",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 820,
+        "y": 1220,
+        "wires": [
+            [
+                "40bbd7a9f610321e"
+            ]
+        ]
+    },
+    {
+        "id": "16f50157dd9917bc",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "iptv-org-us.m3u",
+        "url": "/iptv/iptv-org-us.m3u",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 580,
+        "y": 1220,
+        "wires": [
+            [
+                "c3126eeaf87852a5"
+            ]
+        ]
+    },
+    {
+        "id": "40bbd7a9f610321e",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1070,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "eb4c79a480750222",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv/iptv-org-us.m3u",
+        "info": "http://nodered.iot/iptv/iptv-org-us.m3u",
+        "x": 230,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "995cb1ad4e917188",
+        "type": "subflow:0f2dc18bd6b60182",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 280,
+        "y": 1260,
+        "wires": [
+            [
+                "e1e36196f8d283b4"
+            ]
+        ]
+    },
+    {
+        "id": "723fd82bb19c040d",
+        "type": "subflow:c6b97c003c4dd14e",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 580,
+        "y": 1260,
+        "wires": [
+            [
+                "97510212b99c9c28"
+            ]
+        ]
+    },
+    {
+        "id": "381a5e6736e20f0c",
+        "type": "inject",
+        "z": "9fd980df2da67037",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://iptv-org.github.io/iptv/countries/fr.m3u",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/iptv-org-fr.m3u",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 1420,
+        "wires": [
+            [
+                "96100c6d45457f33"
+            ]
+        ]
+    },
+    {
+        "id": "a8e0048025d1236f",
+        "type": "debug",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 695,
+        "y": 1420,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "6fbb5a0bd5475c1e",
+        "type": "function",
+        "z": "9fd980df2da67037",
+        "name": "filter",
+        "func": "if (msg.topic == \"channel\") {\n    let channel = msg.payload\n\n    // let names = new Set([\n    //     \"Televisa TeleNovelas\", \"Stormcast Novelas\",\n    //     \"Passion Novelas\", \"Fréquence Novelas\", \"Tele.Novela\"\n    // ])\n    // if (names.has(channel.name)) {\n    //     return null\n    // }\n\n    let groups = new Set([\n        \"Business\", \"Gastronomie\", \"Sport\", \"Jeunesse\",\n        \"LifeStyle\" //, \"Actualités\"\n    ])\n    if (groups.has(channel.groupTitle)) {\n        return null\n    }\n\n    // delete channel.extras[\"tvg-chno\"]\n    // channel.name = channel.name += \" iptv-org\"\n}\nreturn msg",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 1420,
+        "wires": [
+            [
+                "322c87d36050a043"
+            ]
+        ]
+    },
+    {
+        "id": "24b3c038965c7b29",
+        "type": "file in",
+        "z": "9fd980df2da67037",
+        "name": "iptv-org-fr.m3u",
+        "filename": "/workspace/iptv/iptv-org-fr.m3u",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 820,
+        "y": 1380,
+        "wires": [
+            [
+                "e993cbc049c643d0"
+            ]
+        ]
+    },
+    {
+        "id": "e791e768619a86d1",
+        "type": "http in",
+        "z": "9fd980df2da67037",
+        "name": "iptv-org-fr.m3u",
+        "url": "/iptv/iptv-org-fr.m3u",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 580,
+        "y": 1380,
+        "wires": [
+            [
+                "24b3c038965c7b29"
+            ]
+        ]
+    },
+    {
+        "id": "e993cbc049c643d0",
+        "type": "http response",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1070,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "812729f145caa9ef",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv/iptv-org-us.m3u",
+        "info": "http://nodered.iot/iptv/iptv-org-us.m3u",
+        "x": 230,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "96100c6d45457f33",
+        "type": "subflow:0f2dc18bd6b60182",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 280,
+        "y": 1420,
+        "wires": [
+            [
+                "6fbb5a0bd5475c1e"
+            ]
+        ]
+    },
+    {
+        "id": "322c87d36050a043",
+        "type": "subflow:c6b97c003c4dd14e",
+        "z": "9fd980df2da67037",
+        "name": "",
+        "x": 580,
+        "y": 1420,
+        "wires": [
+            [
+                "a8e0048025d1236f"
             ]
         ]
     },
@@ -1258,6 +2656,266 @@
             [
                 "a3d76c861c253929"
             ]
+        ]
+    },
+    {
+        "id": "4d4682dc8ddb90ee",
+        "type": "inject",
+        "z": "608d48c1c2c08ca6",
+        "name": "m3u",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://quebectele.com/canada.m3u",
+                "vt": "str"
+            },
+            {
+                "p": "filename",
+                "v": "/workspace/iptv/quebectele.com-ca.m3u",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 110,
+        "y": 600,
+        "wires": [
+            [
+                "d742d4e654fbad3a"
+            ]
+        ]
+    },
+    {
+        "id": "9f511d7d2e81dab6",
+        "type": "debug",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 715,
+        "y": 600,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "6eac0f8c86bc8713",
+        "type": "Stackhero-MySQL",
+        "z": "608d48c1c2c08ca6",
+        "server": "450e85d3c4e887ef",
+        "name": "",
+        "x": 560,
+        "y": 600,
+        "wires": [
+            [
+                "9f511d7d2e81dab6"
+            ]
+        ]
+    },
+    {
+        "id": "d742d4e654fbad3a",
+        "type": "http request",
+        "z": "608d48c1c2c08ca6",
+        "name": "[get] m3u",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 260,
+        "y": 600,
+        "wires": [
+            [
+                "71bad9289c0af459"
+            ]
+        ]
+    },
+    {
+        "id": "71bad9289c0af459",
+        "type": "function",
+        "z": "608d48c1c2c08ca6",
+        "name": "parse",
+        "func": "if (msg.statusCode != 200 || !msg.payload) {\n    // Erreur\n    node.error(\"HTTP request error\", msg);\n    return null\n}\nconst pl = iptvPlaylist.parseM3U(msg.payload)\n\nfor (const channel of pl.channels) {\n    channel.m3uUrl = msg.url\n    channel.xTvgUrl = msg.headers[\"xTvgUrl\"]\n    channel['xTvgUrl'] = msg.headers[\"xTvgUrl\"]\n    channel['tvgChno'] = channel.extras['tvg-chno']\n    channel['radio'] = channel.extras['radio']\n    let newmsg = {\n        topic: `\n        INSERT INTO channels (\\`m3u_url\\`, \\`x-tvg-url\\`, \\`tvg-chno\\`, name, \\`tvg-name\\`,\n            \\`group-title\\`, \\`tvg-id\\`, \\`tvg-logo\\`, radio)\n        VALUES (:m3uUrl, :xTvgUrl, :tvgChno, :name, :tvgName, :groupTitle, :tvgId, :tvgLogo, :radio);`,\n        payload: channel\n    }\n    node.send(newmsg)\n}\nnode.done()\n\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "iptvPlaylist",
+                "module": "@iptv/playlist"
+            }
+        ],
+        "x": 410,
+        "y": 600,
+        "wires": [
+            [
+                "6eac0f8c86bc8713"
+            ]
+        ]
+    },
+    {
+        "id": "4417c0caccb0a04e",
+        "type": "inject",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "DELETE FROM channels",
+        "x": 350,
+        "y": 640,
+        "wires": [
+            [
+                "6eac0f8c86bc8713"
+            ]
+        ]
+    },
+    {
+        "id": "2adb087b18b0d7cd",
+        "type": "xml",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "property": "payload",
+        "attr": "",
+        "chr": "",
+        "x": 470,
+        "y": 820,
+        "wires": [
+            [
+                "84dc367f9a43d2da"
+            ]
+        ]
+    },
+    {
+        "id": "495f383bf45010e6",
+        "type": "inject",
+        "z": "608d48c1c2c08ca6",
+        "name": "HDTGM",
+        "props": [
+            {
+                "p": "url",
+                "v": "https://feeds.simplecast.com/Ao0C24M8",
+                "vt": "str"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "hdtgm",
+        "x": 110,
+        "y": 820,
+        "wires": [
+            [
+                "a72c6d1091695ae0"
+            ]
+        ]
+    },
+    {
+        "id": "a72c6d1091695ae0",
+        "type": "http request",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": false,
+        "url": "",
+        "persist": false,
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 290,
+        "y": 820,
+        "wires": [
+            [
+                "2adb087b18b0d7cd"
+            ]
+        ]
+    },
+    {
+        "id": "84dc367f9a43d2da",
+        "type": "debug",
+        "z": "608d48c1c2c08ca6",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "85efa98d6db4078f",
+        "type": "inject",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "props": [
+            {
+                "p": "enable",
+                "v": "true",
+                "vt": "bool"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 110,
+        "y": 380,
+        "wires": [
+            [
+                "1ea89ebc728e1dec"
+            ]
+        ]
+    },
+    {
+        "id": "1ea89ebc728e1dec",
+        "type": "ha-fire-event",
+        "z": "608d48c1c2c08ca6",
+        "name": "",
+        "server": "ed5efe6d8e7741eb",
+        "version": 0,
+        "event": "blabla",
+        "data": "{\t    \"blep\": \"bleep blop bloop\"\t}",
+        "dataType": "jsonata",
+        "x": 330,
+        "y": 380,
+        "wires": [
+            []
         ]
     }
 ]
