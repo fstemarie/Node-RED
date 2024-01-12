@@ -1115,7 +1115,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "43200",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -1269,7 +1269,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "43200",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -1421,7 +1421,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "43200",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -1573,7 +1573,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "43200",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -1725,7 +1725,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "43200",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -1911,7 +1911,7 @@
         "onceDelay": 0.1,
         "topic": "",
         "x": 130,
-        "y": 80,
+        "y": 60,
         "wires": [
             [
                 "b848cb48963f6475"
@@ -1941,7 +1941,7 @@
         "id": "3df36e4bdec5c231",
         "type": "function",
         "z": "9fd980df2da67037",
-        "name": "function 1",
+        "name": "filter",
         "func": "const files = msg.payload.trim().split(os.EOL)\nmsg.payload = \"\"\nmsg.payload.files = msg.files = files\n\n// for (let file of files) {\n//     msg.files.push(file)\n// }\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
@@ -1954,7 +1954,7 @@
                 "module": "os"
             }
         ],
-        "x": 460,
+        "x": 450,
         "y": 120,
         "wires": [
             [
@@ -1990,7 +1990,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "43200",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -2142,7 +2142,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "43200",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -2294,7 +2294,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "43200",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -2428,6 +2428,16 @@
                 "a8e0048025d1236f"
             ]
         ]
+    },
+    {
+        "id": "df42e51bea97c038",
+        "type": "comment",
+        "z": "9fd980df2da67037",
+        "name": "http://nodered.iot/iptv",
+        "info": "http://nodered.iot/iptv",
+        "x": 340,
+        "y": 60,
+        "wires": []
     },
     {
         "id": "3dc65f3a354fd372",
