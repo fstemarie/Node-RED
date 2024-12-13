@@ -16,7 +16,7 @@
     {
         "id": "9fd980df2da67037",
         "type": "tab",
-        "label": "IPTV",
+        "label": "IPTV m3u",
         "disabled": false,
         "info": "",
         "env": []
@@ -24,7 +24,15 @@
     {
         "id": "c58e172c38c3f313",
         "type": "tab",
-        "label": "Flow 2",
+        "label": "IPTV epg",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f9d291d72e4362b9",
+        "type": "tab",
+        "label": "falarie_bot",
         "disabled": false,
         "info": "",
         "env": []
@@ -107,7 +115,7 @@
         "id": "450e85d3c4e887ef",
         "type": "Stackhero-MySQL-Server",
         "name": "mariadb",
-        "host": "mariadb",
+        "host": "db",
         "port": "3306",
         "tls": false,
         "database": "iptv"
@@ -115,7 +123,7 @@
     {
         "id": "ed5efe6d8e7741eb",
         "type": "server",
-        "name": "homeassistant.iot",
+        "name": "HomeAssistant",
         "version": 5,
         "addon": false,
         "rejectUnauthorizedCerts": true,
@@ -136,13 +144,12 @@
         "enableGlobalContextStore": false
     },
     {
-        "id": "715fcfcd8e2590e1",
-        "type": "ha-device-config",
-        "name": "Peripherique mystere",
-        "hwVersion": "00000000.1",
-        "manufacturer": "Node-RED",
-        "model": "inconnu",
-        "swVersion": "0.1b"
+        "id": "baa368f605b538b4",
+        "type": "matrix-server-config",
+        "name": "@falarie_bot:matrix.org",
+        "autoAcceptRoomInvites": false,
+        "enableE2ee": true,
+        "global": true
     },
     {
         "id": "65ce5291fc0e55f7",
@@ -261,7 +268,7 @@
         "type": "function",
         "z": "c6b97c003c4dd14e",
         "name": "stringify",
-        "func": "if (msg.topic == \"playlist\"){\n    const pl = msg.payload\n    pl.headers[\"x-tvg-url\"] = pl.headers[\"xTvgUrl\"]\n    delete pl.headers[\"xTvgUrl\"]\n\n    const m3u = iptvPlaylist.writeM3U(pl)\n    msg.topic = \"m3u\"\n    msg.playlist = pl\n    msg.payload = m3u\n    return msg\n}\nreturn null",
+        "func": "if (msg.topic == \"playlist\"){\n    const pl = msg.payload\n    if (pl.headers[\"xTvgUrl\"]) {\n        pl.headers[\"url-tvg\"] = pl.headers[\"xTvgUrl\"]\n        delete pl.headers[\"xTvgUrl\"]\n    }\n    if (pl.headers[\"urlTvg\"]) {\n        pl.headers[\"url-tvg\"] = pl.headers[\"urlTvg\"]\n        delete pl.headers[\"urlTvg\"]\n    }\n\n    const m3u = iptvPlaylist.writeM3U(pl)\n    msg.topic = \"m3u\"\n    msg.playlist = pl\n    msg.payload = m3u\n    return msg\n}\nreturn null",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -295,8 +302,27 @@
         "x": 610,
         "y": 80,
         "wires": [
-            []
+            [
+                "f7e726fb34216982"
+            ]
         ]
+    },
+    {
+        "id": "f7e726fb34216982",
+        "type": "debug",
+        "z": "c6b97c003c4dd14e",
+        "name": "debug 9",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 160,
+        "wires": []
     },
     {
         "id": "63d893f4.3e39a4",
@@ -363,8 +389,9 @@
         "type": "function",
         "z": "2dbe54a8.332f04",
         "name": "filter",
-        "func": "const posts = msg.payload.filter(x => {\n    let re = /(free)|(100)/ig\n    if (x.title.search(re) == -1)\n        return false\n    re = /(limited time)|(weekend)|(free to play)|(trial)|(buy)/ig\n    if (x.title.search(re) > -1)\n        return false\n    if (x.domain === \"self.GameDeals\")\n        return false\n\n    return true\n})\n\nif (posts.length) {\n    msg.payload = posts\n    return msg\n} else {\n    return null\n}\n\n",
+        "func": "const posts = msg.payload.filter(x => {\n    let re = /(free)|(100)/ig\n    if (x.title.search(re) == -1)\n        return false\n    re = /(Itch.io)|(IndieGala)|(limited time)|(weekend)|(free to play)|(trial)|(buy)/ig\n    if (x.title.search(re) > -1)\n        return false\n    if (x.domain === \"self.GameDeals\")\n        return false\n\n    return true\n})\n\nif (posts.length) {\n    msg.payload = posts\n    return msg\n} else {\n    return null\n}\n\n",
         "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
@@ -501,7 +528,7 @@
         "token": "oauth2Response.access_token",
         "secure": true,
         "tls": true,
-        "name": "fstemarie@gmail.com",
+        "name": "fstemarie@gmail.com; frstemarie@geeksquad.ca",
         "dname": "gmail",
         "x": 1050,
         "y": 220,
@@ -1133,7 +1160,7 @@
         "type": "debug",
         "z": "9fd980df2da67037",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1287,7 +1314,7 @@
         "type": "debug",
         "z": "9fd980df2da67037",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1439,7 +1466,7 @@
         "type": "debug",
         "z": "9fd980df2da67037",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1524,9 +1551,9 @@
         "id": "10b64747fc417777",
         "type": "comment",
         "z": "9fd980df2da67037",
-        "name": "http://nodered.iot/iptv/quebectele-ca.m3u",
-        "info": "http://nodered.iot/iptv/quebectele-ca.m3u",
-        "x": 240,
+        "name": "http://nodered.iot/iptv/quebectele.com-ca.m3u",
+        "info": "http://nodered.iot/iptv/quebectele.com-ca.m3u",
+        "x": 250,
         "y": 900,
         "wires": []
     },
@@ -1591,7 +1618,7 @@
         "type": "debug",
         "z": "9fd980df2da67037",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1743,7 +1770,7 @@
         "type": "debug",
         "z": "9fd980df2da67037",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -2008,7 +2035,7 @@
         "type": "debug",
         "z": "9fd980df2da67037",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -2160,7 +2187,7 @@
         "type": "debug",
         "z": "9fd980df2da67037",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -2312,7 +2339,7 @@
         "type": "debug",
         "z": "9fd980df2da67037",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -2438,6 +2465,542 @@
         "x": 340,
         "y": 60,
         "wires": []
+    },
+    {
+        "id": "acce47c2d3a60231",
+        "type": "xml",
+        "z": "c58e172c38c3f313",
+        "name": "",
+        "property": "payload",
+        "attr": "",
+        "chr": "",
+        "x": 510,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "de45ab453530afc8",
+        "type": "http request",
+        "z": "c58e172c38c3f313",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": false,
+        "url": "",
+        "persist": false,
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 330,
+        "y": 60,
+        "wires": [
+            [
+                "acce47c2d3a60231"
+            ]
+        ]
+    },
+    {
+        "id": "14eb1c52515f4d72",
+        "type": "inject",
+        "z": "c58e172c38c3f313",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 60,
+        "wires": [
+            [
+                "de45ab453530afc8"
+            ]
+        ]
+    },
+    {
+        "id": "189f81acd8b30944",
+        "type": "matrix-room-invite",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "server": "baa368f605b538b4",
+        "roomId": null,
+        "x": 90,
+        "y": 40,
+        "wires": [
+            [
+                "3ce744cbfc6f1d0c"
+            ]
+        ]
+    },
+    {
+        "id": "8bf6f839332b3525",
+        "type": "matrix-join-room",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "server": "baa368f605b538b4",
+        "x": 470,
+        "y": 40,
+        "wires": [
+            [
+                "93b84597eded25a1"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "3ce744cbfc6f1d0c",
+        "type": "function",
+        "z": "f9d291d72e4362b9",
+        "name": "Access control",
+        "func": "const users = [\n    '@francois_stemarie:matrix.org',\n    '@philippe_stemarie:matrix.org'\n]\nif (!users.includes(msg.userId)) return null\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 40,
+        "wires": [
+            [
+                "8bf6f839332b3525"
+            ]
+        ]
+    },
+    {
+        "id": "e270db2fb81116e2",
+        "type": "inject",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 600,
+        "wires": [
+            [
+                "10b4a5409ca02f7b"
+            ]
+        ]
+    },
+    {
+        "id": "10b4a5409ca02f7b",
+        "type": "http request",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://qb/api/v2/torrents/info?filter=downloading",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 270,
+        "y": 600,
+        "wires": [
+            [
+                "e47484fee0f6f5bf"
+            ]
+        ]
+    },
+    {
+        "id": "e47484fee0f6f5bf",
+        "type": "debug",
+        "z": "f9d291d72e4362b9",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "6363e4332fb5f5fd",
+        "type": "matrix-receive",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "server": "baa368f605b538b4",
+        "roomId": "",
+        "acceptText": true,
+        "acceptEmotes": true,
+        "acceptStickers": true,
+        "acceptReactions": true,
+        "acceptFiles": true,
+        "acceptAudio": true,
+        "acceptImages": true,
+        "acceptVideos": true,
+        "acceptLocations": true,
+        "x": 100,
+        "y": 100,
+        "wires": [
+            [
+                "52624945d61ea21e"
+            ]
+        ]
+    },
+    {
+        "id": "52624945d61ea21e",
+        "type": "function",
+        "z": "f9d291d72e4362b9",
+        "name": "Access control",
+        "func": "const users = [\n    '@francois_stemarie:matrix.org',\n    '@philippe_stemarie:matrix.org'\n]\nif (!users.includes(msg.userId)) return null\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "commander",
+                "module": "commander"
+            }
+        ],
+        "x": 300,
+        "y": 100,
+        "wires": [
+            [
+                "112c7d20beee9d55"
+            ]
+        ]
+    },
+    {
+        "id": "ed5b847e62667bca",
+        "type": "matrix-leave-room",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "server": "baa368f605b538b4",
+        "roomId": null,
+        "x": 330,
+        "y": 280,
+        "wires": [
+            [
+                "f590e3774e76965d"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "93b84597eded25a1",
+        "type": "debug",
+        "z": "f9d291d72e4362b9",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 640,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "e7c106caff0257fe",
+        "type": "matrix-send-message",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "server": "baa368f605b538b4",
+        "roomId": "",
+        "message": "",
+        "messageType": "m.text",
+        "messageFormat": "",
+        "replaceMessage": false,
+        "x": 340,
+        "y": 340,
+        "wires": [
+            [
+                "f590e3774e76965d"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "112c7d20beee9d55",
+        "type": "function",
+        "z": "f9d291d72e4362b9",
+        "name": "parse",
+        "func": "function parse(command) {\n    command = command.trim()\n    let args = []\n    let token = \"\"\n    let quoted = false\n    for (let i = 0; i < command.length; i++) {\n        let c = command[i]\n        if (!quoted && c == \" \") {\n            args.push(token)\n            token = \"\"\n        } else if (!quoted && (c == '\"' || c == \"'\")) {\n            quoted = c\n        } else if (quoted == c) {\n            quoted = false\n        } else {\n            token = token.concat(c)\n        }\n    }\n    args.push(token)\n    return args\n}\nmsg.args = parse(msg.payload)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "Commander",
+                "module": "commander"
+            }
+        ],
+        "x": 470,
+        "y": 100,
+        "wires": [
+            [
+                "9c4d3e4245806203"
+            ]
+        ]
+    },
+    {
+        "id": "f590e3774e76965d",
+        "type": "debug",
+        "z": "f9d291d72e4362b9",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 520,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "8fb1a0bf126f1de7",
+        "type": "inject",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "test \"tes'ting\" 'bla bla'",
+        "payloadType": "str",
+        "x": 330,
+        "y": 140,
+        "wires": [
+            [
+                "112c7d20beee9d55"
+            ]
+        ]
+    },
+    {
+        "id": "b3f1c117a7fa9cd8",
+        "type": "matrix-receive",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "server": "baa368f605b538b4",
+        "roomId": "",
+        "acceptText": true,
+        "acceptEmotes": true,
+        "acceptStickers": true,
+        "acceptReactions": true,
+        "acceptFiles": true,
+        "acceptAudio": true,
+        "acceptImages": true,
+        "acceptVideos": true,
+        "acceptLocations": true,
+        "x": 920,
+        "y": 660,
+        "wires": [
+            [
+                "d0ad2e818fa1a8a2"
+            ]
+        ]
+    },
+    {
+        "id": "d0ad2e818fa1a8a2",
+        "type": "debug",
+        "z": "f9d291d72e4362b9",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1100,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "9c4d3e4245806203",
+        "type": "switch",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "!bye",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "!capue",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "!qb",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 3,
+        "x": 110,
+        "y": 280,
+        "wires": [
+            [
+                "ed5b847e62667bca"
+            ],
+            [
+                "e7c106caff0257fe"
+            ],
+            [
+                "f0cb22c0820f091d"
+            ]
+        ],
+        "outputLabels": [
+            "!qb",
+            "!capue",
+            null
+        ]
+    },
+    {
+        "id": "f0cb22c0820f091d",
+        "type": "http request",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://qb.home/api/v2/torrents/info",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 330,
+        "y": 400,
+        "wires": [
+            [
+                "4cec8a6d4ea5f7c6"
+            ]
+        ]
+    },
+    {
+        "id": "4cec8a6d4ea5f7c6",
+        "type": "json",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 490,
+        "y": 400,
+        "wires": [
+            [
+                "a42903710b91abd2",
+                "6f935b204daf80fb"
+            ]
+        ]
+    },
+    {
+        "id": "a42903710b91abd2",
+        "type": "template",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Torrents\n{{#payload}}\n    Title: {{{name}}}\n    Category: {{{category}}}\n    Tags: {{{tags}}}\n    State: {{{state}}}\n    \n{{/payload}}\n",
+        "output": "str",
+        "x": 640,
+        "y": 360,
+        "wires": [
+            [
+                "391dfefab9cdaf6a"
+            ]
+        ]
+    },
+    {
+        "id": "6f935b204daf80fb",
+        "type": "debug",
+        "z": "f9d291d72e4362b9",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "391dfefab9cdaf6a",
+        "type": "matrix-send-message",
+        "z": "f9d291d72e4362b9",
+        "name": "",
+        "server": "baa368f605b538b4",
+        "roomId": "",
+        "message": "",
+        "messageType": "m.text",
+        "messageFormat": "",
+        "replaceMessage": false,
+        "x": 820,
+        "y": 360,
+        "wires": [
+            [
+                "6f935b204daf80fb"
+            ],
+            []
+        ]
     },
     {
         "id": "3dc65f3a354fd372",
